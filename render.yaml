@@ -1,0 +1,15 @@
+# In Render: New > Blueprint > connect your GitHub sing repository.
+services:
+  - type: web
+    name: sing
+    runtime: static
+    buildCommand: echo "Static site ready"
+    staticPublishPath: .
+    autoDeployTrigger: commit
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
