@@ -15,13 +15,14 @@
 
 - `index.html`：页面结构
 - `style.css`：响应式布局、纸张风格、CSS 小妖和动画
+- `layout.css`：桌面宽屏布局与输入区样式调整
 - `game.js`：诗库、识别、战斗和关卡逻辑
 
 采用本地诗库匹配，非 AI 语义识别。可在 `game.js` 的 `POEMS` 数组中扩充诗句。无需网络即可游戏；在线时会尝试加载 Noto Serif SC 字体，离线时使用系统宋体。刷新页面会重新开始。
 
 ## GitHub + Render 公网部署
 
-1. 将本文件夹中的 `index.html`、`style.css`、`game.js`、`render.yaml`、`.gitignore` 和 `README.md` 提交到自己的 GitHub `sing` 仓库根目录。
+1. 将本文件夹中的 `index.html`、`style.css`、`layout.css`、`game.js`、`render.yaml`、`.gitignore` 和 `README.md` 提交到自己的 GitHub `sing` 仓库根目录。
 2. 登录 <https://dashboard.render.com/>，选择 **New → Blueprint**，授权 GitHub 并选择 `sing` 仓库。
 3. Render 会读取 `render.yaml`，创建名为 `sing` 的 Static Site，确认部署。
 4. 部署成功后，使用 Render 显示的 `https://….onrender.com` 地址访问。实际子域名由 Render 分配，不一定是 `sing.onrender.com`。

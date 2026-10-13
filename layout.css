@@ -1,0 +1,64 @@
+/* Keep feedback for actual attacks and errors; no idle instructional row. */
+.feedback:empty { min-height: 0; padding: 0; }
+.writing-area { margin-bottom: 16px; }
+
+/* Desktop uses the available canvas while retaining the mobile layout. */
+@media (min-width: 1051px) {
+  .topbar { width: 94%; max-width: 1720px; height: 80px; margin: auto; }
+  .intro { padding: 23px 0 24px; }
+  .game-layout {
+    width: 94%;
+    max-width: 1720px;
+    padding: 0;
+    grid-template-columns: minmax(210px, .85fr) minmax(440px, 2.5fr) minmax(245px, 1fr);
+    gap: clamp(18px, 1.8vw, 32px);
+    align-items: stretch;
+  }
+  .left-column, .right-column { padding-top: 0; }
+  .left-column { grid-template-rows: auto 1fr; }
+  .right-column { grid-template-rows: auto auto 1fr; }
+  .battle { display: flex; flex-direction: column; }
+  .battle-top { padding: 22px 28px 0; }
+  .chapter { font-size: 15px; }
+  .text-button { font-size: 12px; }
+  .stage-node { width: 28px; height: 28px; font-size: 12px; }
+  .stage-line { width: 40px; }
+  .enemy-heading h2 { font-size: 28px; }
+  .enemy-heading p { font-size: 12px; }
+  .enemy-health { max-width: 500px; font-size: 11px; }
+  .scene { flex: 1 0 auto; height: clamp(250px, 30vh, 360px); margin: 0 24px; }
+  .monster { top: auto; bottom: 37px; scale: 1.35; transform-origin: 0 100%; }
+  .monster-shadow { width: 180px; height: 22px; }
+  .speech { font-size: 12px; top: 20px; padding: 10px 16px; }
+  .scene-sun { width: 90px; height: 90px; right: 12%; }
+  .mountain { width: 65%; height: 150px; background: #e4e7d260; }
+  .mountain-front { width: 65%; height: 125px; background: #d9dfc34d; }
+  .scene-leaf { font-size: 100px; }
+  .leaf-two { font-size: 85px; }
+  .scene-caption { font-size: 12px; }
+  .writing-area { margin: 20px 28px; }
+  .writing-heading h3 { font-size: 18px; }
+  .writing-heading > span { font-size: 11px; }
+  form { padding: 16px 18px 14px; }
+  textarea { font-size: 16px; min-height: 76px; }
+  .input-bottom > span { font-size: 11px; }
+  .attack-button { font-size: 15px; padding: 12px 24px; }
+  .feedback { font-size: 12px; min-height: 0; padding-bottom: 0; }
+  .battle-footer { padding: 15px 28px; font-size: 11px; }
+  .section-label { font-size: 17px; }
+  .section-label > span { font-size: 11px; }
+  .player-card { padding: 24px; }
+  .player-card > p, .player-health-label, .player-stats span { font-size: 12px; }
+  .daily-card { display: flex; flex-direction: column; justify-content: space-between; padding: 24px; }
+  .poem-vertical { font-size: 22px; height: 178px; margin: 24px auto 16px; }
+  .daily-card > p { font-size: 11px; }
+  .inspiration { padding: 23px 21px 20px; }
+  .card-subtitle, .suggestion-note { font-size: 11px; }
+  .tabs button { font-size: 13px; padding: 8px 0; }
+  .poem-tile { padding: 14px 12px; }
+  .poem-tile strong { font-size: 15px; }
+  .poem-tile small { font-size: 11px; }
+  .tip-card h3 { font-size: 15px; }
+  .tip-card p, .empty-log, .log-entry { font-size: 12px; }
+  .page-footer { padding: 22px 10px; }
+}

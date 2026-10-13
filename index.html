@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#eee5cf" />
   <title>诗出有名 · 以诗为剑</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="layout.css" />
 </head>
 <body>
   <header class="topbar">
@@ -33,7 +34,7 @@
           <div class="monster-shadow"></div><div id="damage" class="damage" aria-live="polite"></div><div class="ground-line"></div>
           <span class="scene-caption">山林有小妖，待君以诗降。</span>
         </div>
-        <div class="writing-area"><div class="writing-heading"><h3><span>✦</span> 落笔成招</h3><span>诗、词、曲，皆可入阵</span></div><form id="attackForm"><label class="sr-only" for="poemInput">输入古诗词句</label><textarea id="poemInput" maxlength="200" rows="2" placeholder="在这里写下一句你记得的古诗词…&#10;例如：飞流直下三千尺"></textarea><div class="input-bottom"><span><kbd>Enter</kbd> 出招 <i>·</i> <span id="charCount">0</span>/200</span><button class="attack-button" id="attackButton" type="submit">以诗出招 <span>↗</span></button></div></form><div class="feedback" id="feedback" role="status">✧ 诗句越完整，伤害越高。含「月」的诗句还有额外加成！</div></div>
+        <div class="writing-area"><div class="writing-heading"><h3><span>✦</span> 落笔成招</h3><span>诗、词、曲，皆可入阵</span></div><form id="attackForm"><label class="sr-only" for="poemInput">输入古诗词句</label><textarea id="poemInput" maxlength="200" rows="2" placeholder="在这里写下一句你记得的古诗词…&#10;例如：飞流直下三千尺"></textarea><div class="input-bottom"><span><span id="charCount">0</span>/200</span><button class="attack-button" id="attackButton" type="submit">以诗出招 <span>↗</span></button></div></form><div class="feedback" id="feedback" role="status"></div></div>
         <div class="battle-footer"><span><i class="status-dot"></i> 随心落笔，不限时间</span><span id="comboText">让第一句诗，开启你的江湖</span></div>
       </section>
 

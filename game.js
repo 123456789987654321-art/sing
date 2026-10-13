@@ -61,7 +61,7 @@ function resetGame() {
   $('battleLog').innerHTML='<p class="empty-log">清风翻开书页，<br>故事等你落笔。</p>';
   $('poemInput').value=''; $('charCount').textContent='0';
   $('resultDialog').close(); $('monster').classList.remove('hit');
-  feedback('✧ 诗句越完整，伤害越高。含「月」的诗句还有额外加成！');
+  feedback('');
   render(); renderSuggestions();
 }
 function render() {
