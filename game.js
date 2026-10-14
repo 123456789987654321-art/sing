@@ -58,7 +58,6 @@ let state, category='唐诗', sound=false, audioContext, transitionTimer;
 function resetGame() {
   clearTimeout(transitionTimer);
   state={stage:0,hp:100,enemyHp:120,score:0,defeated:0,combo:0,used:new Set(),busy:false,over:false};
-  $('battleLog').innerHTML='<p class="empty-log">清风翻开书页，<br>故事等你落笔。</p>';
   $('poemInput').value=''; $('charCount').textContent='0';
   $('resultDialog').close(); $('monster').classList.remove('hit');
   feedback('');
@@ -84,11 +83,6 @@ function render() {
   if (!state.busy) $('enemySpeech').textContent=['哼，没点诗意可过不了我这关！','花开花落，你还记得哪一句？','风声太大，让我听听你的诗！','诗海无涯，接招吧！','最后一关，看你的真本事！'][state.stage];
 }
 function feedback(message,type='') { $('feedback').textContent=message; $('feedback').className=`feedback ${type}`; }
-function log(text) {
-  const empty=$('battleLog').querySelector('.empty-log'); if(empty) empty.remove();
-  const entry=document.createElement('p'); entry.className='log-entry'; entry.textContent=text; $('battleLog').prepend(entry);
-  while($('battleLog').children.length>3) $('battleLog').lastElementChild.remove();
-}
 function playTone(victory=false) {
   if(!sound) return;
   try {
@@ -115,7 +109,6 @@ function attack(event) {
   $('monster').classList.remove('hit');void $('monster').offsetWidth;$('monster').classList.add('hit');
   $('poemInput').value='';$('charCount').textContent='0';
   feedback(`「${match.poem[1]} · ${match.poem[2]}」命中！造成 ${damage} 点伤害${bonus?'，诗意加成 +20':''}。`,'success');
-  log(`「${text.length>12?text.slice(0,12)+'…':text}」 · −${damage} 妖气`);
   $('enemySpeech').textContent=state.enemyHp?'哎哟！这句诗，有点厉害…':'好诗好诗！小妖甘拜下风…';
   playTone(state.enemyHp===0);render();renderSuggestions();
   transitionTimer=setTimeout(()=>{
@@ -125,11 +118,9 @@ function attack(event) {
       if(state.stage===STAGES.length-1){finish(true);return;}
       state.stage++;state.enemyHp=STAGES[state.stage].hp;state.used.clear();
       feedback(`✦ 小妖已降服，恢复 25 点元气！新关卡含「${STAGES[state.stage].word}」字的诗句伤害更高。`,'success');
-      log(`进入${STAGES[state.stage].chapter} · 元气 +25`);
     }else{
       state.hp=Math.max(0,state.hp-8);
       if(state.hp===0){finish(false);return;}
-      log('小妖反击 · 元气 −8');
     }
     state.busy=false;render();renderSuggestions();$('poemInput').focus({preventScroll:true});
   },950);

@@ -37,14 +37,15 @@
         <div class="battle-footer"><span><i class="status-dot"></i> 随心落笔，不限时间</span><span id="comboText">让第一句诗，开启你的江湖</span></div>
       </section>
 
-      <aside class="right-column"><section class="paper inspiration"><div class="section-label">诗意锦囊 <span class="tiny-icon">✧</span></div><p class="card-subtitle">一时想不起？借一缕诗意。</p><div class="tabs" role="tablist"><button class="active" data-category="唐诗" role="tab" aria-selected="true">唐诗</button><button data-category="宋词" role="tab" aria-selected="false">宋词</button><button data-category="元曲" role="tab" aria-selected="false">元曲</button></div><div id="suggestions" class="suggestions"></div><p class="suggestion-note">点击诗句，落入笔下 ↙</p></section>
+      <aside class="right-column"><details class="paper inspiration" id="inspirationPanel" open><summary class="section-label">诗意锦囊 <span class="panel-arrow">⌄</span></summary><div class="inspiration-content"><p class="card-subtitle">一时想不起？借一缕诗意。</p><div class="tabs" role="tablist"><button class="active" data-category="唐诗" role="tab" aria-selected="true">唐诗</button><button data-category="宋词" role="tab" aria-selected="false">宋词</button><button data-category="元曲" role="tab" aria-selected="false">元曲</button></div><div id="suggestions" class="suggestions"></div><p class="suggestion-note">点击诗句，落入笔下 ↙</p></div></details>
       <section class="paper tip-card"><span class="tip-icon">☾</span><div><h3>本关诗意 · 月</h3><p id="weaknessTip">诗句中含「月」字<br>可获得 <b>额外 20 点</b>伤害</p></div></section>
-      <section class="paper log-card"><div class="section-label">战斗手记 <span>✎</span></div><div id="battleLog"><p class="empty-log">清风翻开书页，<br>故事等你落笔。</p></div></section></aside>
+      </aside>
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
   <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>以诗为剑，落笔成招</h2><p>输入锦囊中或内置诗库里的古诗词句，按 Enter 或点击「以诗出招」攻击小妖。标点和空格不影响识别。</p><ul><li>每个汉字造成 6 点伤害，完整两句额外加 15 点。</li><li>命中本关主题字，额外造成 20 点伤害。</li><li>连续命中有连击加成；同一关不能重复使用同一句。</li><li>每次有效攻击后，存活的小妖会反击 8 点元气。</li><li>击败小妖恢复 25 点元气，闯过五关即获胜。</li></ul><p class="dialog-note">离线诗库识别：暂未收录的诗句不会造成伤害，也不会扣除元气。可以点击锦囊中的诗句试试。</p><button class="primary-button dialog-close-action">提笔入江湖</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button></dialog>
   <script src="game.js"></script>
+  <script src="layout.js"></script>
 </body>
 </html>
