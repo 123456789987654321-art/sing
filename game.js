@@ -58,7 +58,7 @@ let state, category='唐诗', sound=false, audioContext, transitionTimer;
 function resetGame() {
   clearTimeout(transitionTimer);
   state={stage:0,hp:100,enemyHp:120,score:0,defeated:0,combo:0,used:new Set(),busy:false,over:false};
-  $('poemInput').value=''; $('charCount').textContent='0';
+  $('poemInput').value='';
   $('resultDialog').close(); $('monster').classList.remove('hit');
   feedback('');
   render(); renderSuggestions();
@@ -106,7 +106,7 @@ function attack(event) {
   state.enemyHp=Math.max(0,state.enemyHp-damage);state.score+=damage;state.busy=true;
   $('damage').textContent=`−${damage}`;$('damage').classList.remove('show');void $('damage').offsetWidth;$('damage').classList.add('show');
   $('monster').classList.remove('hit');void $('monster').offsetWidth;$('monster').classList.add('hit');
-  $('poemInput').value='';$('charCount').textContent='0';
+  $('poemInput').value='';
   feedback(`「${match.poem[1]} · ${match.poem[2]}」命中！造成 ${damage} 点伤害${bonus?'，诗意加成 +20':''}。`,'success');
   $('enemySpeech').textContent=state.enemyHp?'哎哟！这句诗，有点厉害…':'好诗好诗！小妖甘拜下风…';
   playTone(state.enemyHp===0);render();renderSuggestions();
@@ -145,12 +145,11 @@ function renderSuggestions(){
     const button=document.createElement('button');button.className='poem-tile';
     const title=document.createElement('strong');title.textContent=item.line;
     const author=document.createElement('small');author.textContent=`${item.poem[1]} · ${item.poem[2]}`;
-    button.append(title,author);button.addEventListener('click',()=>{if(state.over)return;$('poemInput').value=item.line;$('charCount').textContent=item.line.length;$('poemInput').focus({preventScroll:true});});
+    button.append(title,author);button.addEventListener('click',()=>{if(state.over)return;$('poemInput').value=item.line;$('poemInput').focus({preventScroll:true});});
     $('suggestions').append(button);
   }
 }
 $('attackForm').addEventListener('submit',attack);
-$('poemInput').addEventListener('input',()=>{$('charCount').textContent=$('poemInput').value.length;});
 $('poemInput').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing&&event.keyCode!==229){event.preventDefault();$('attackForm').requestSubmit();}});
 $('resetButton').addEventListener('click',resetGame);
 $('playAgain').addEventListener('click',resetGame);
