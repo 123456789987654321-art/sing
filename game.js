@@ -239,8 +239,8 @@ function render() {
   $('enemyHpText').textContent = `${state.enemyHp} / ${stage.hp}`;
   $('enemyHpBar').style.width = `${state.enemyHp / stage.hp * 100}%`;
   $('playerHpText').textContent = `${state.hp} / 6`;
-  $('playerStars').setAttribute('aria-label', `剩余 ${state.hp} 颗星，共 6 颗`);
-  $('playerStars').innerHTML = Array.from({length:6}, (_,index) => `<span class="life-star${index < state.hp ? '' : ' lost'}" aria-hidden="true">★</span>`).join('');
+  $('playerHearts').setAttribute('aria-label', `剩余 ${state.hp} 颗爱心，共 6 颗`);
+  $('playerHearts').innerHTML = Array.from({length:6}, (_,index) => `<span class="life-heart${index < state.hp ? '' : ' lost'}" aria-hidden="true">♥</span>`).join('');
   $('defeated').textContent = state.defeated;
   $('monster').style.setProperty('--monster', stage.color);
   $('stageProgress').hidden = learning;
@@ -424,7 +424,7 @@ function attack() {
     state.wrongSlots = new Set([...state.question.answer].flatMap((char,index) => selectedCharacter(index) !== char ? [index] : []));
     state.hp = Math.max(0, state.hp - 1);
     render();
-    feedback('红色字块有误，扣 1 颗星。点错字撤回重选。', 'error');
+    feedback('红色字块有误，扣 1 颗爱心。点错字撤回重选。', 'error');
     if (state.hp === 0) finish(false);
     return;
   }
@@ -448,7 +448,7 @@ function attack() {
   $('damage').textContent = damage ? `−${damage}` : '0';
   $('damage').classList.remove('show'); void $('damage').offsetWidth; $('damage').classList.add('show');
   if (damage) { $('monster').classList.remove('hit'); void $('monster').offsetWidth; $('monster').classList.add('hit'); }
-  feedback(`「${answer}」拼对了！${state.assisted.size ? `帮助 ${state.assisted.size} 字，` : ''}造成 ${damage} 点伤害。${helpPenalty ? ` ${helpMajority ? '本句帮助字数超过自行填写' : '连续三句使用帮助'}，扣 1 颗星。` : ''}`, helpPenalty ? 'error' : 'success');
+  feedback(`「${answer}」拼对了！${state.assisted.size ? `帮助 ${state.assisted.size} 字，` : ''}造成 ${damage} 点伤害。${helpPenalty ? ` ${helpMajority ? '本句帮助字数超过自行填写' : '连续三句使用帮助'}，扣 1 颗爱心。` : ''}`, helpPenalty ? 'error' : 'success');
   $('enemySpeech').textContent = state.enemyHp ? (damage ? '哎哟！这句诗，有点厉害…' : '这句学会啦，下句自己来！') : '好诗好诗！小妖甘拜下风…';
   playTone(state.enemyHp === 0);
   render();
@@ -493,8 +493,8 @@ function finish(won) {
   state.over = true;
   state.busy = false;
   render();
-  $('resultTitle').textContent = won ? '诗出有名，名满诗圈！' : '星星用完了，再来一轮吧';
-  $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '四季篇四章已过，每一个字都有力量。' : '填错、连续三句使用帮助或帮助字数过半会扣星。重新开始可恢复 6 颗星。'}`;
+  $('resultTitle').textContent = won ? '诗出有名，名满诗圈！' : '爱心用完了，再来一轮吧';
+  $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '四季篇四章已过，每一个字都有力量。' : '填错、连续三句使用帮助或帮助字数过半会扣爱心。重新开始可恢复 6 颗爱心。'}`;
   $('resultDialog').showModal();
 }
 

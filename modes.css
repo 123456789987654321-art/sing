@@ -163,9 +163,9 @@
 }
 
 /* Six lives and a poem manuscript revealed only after correct submissions. */
-.life-stars.player-track { display: flex; align-items: center; justify-content: space-between; gap: 5px; height: auto; max-width: none; background: none; }
-.life-star { font-size: 27px; line-height: 1.2; color: #c09c54; text-shadow: 0 1px #fff8de; }
-.life-star.lost { color: #d9d3c4; text-shadow: none; }
+.life-hearts.player-track { display: flex; align-items: center; justify-content: space-between; gap: 5px; height: auto; max-width: none; background: none; }
+.life-heart { font-size: 27px; line-height: 1.2; color: #c74f56; text-shadow: 0 1px #ffe5e3; }
+.life-heart.lost { color: #d9d3c4; text-shadow: none; }
 .puzzle-help { border: 1px solid #c3b18c; border-radius: 7px; background: #f5ecd6; color: #856c43; padding: 6px 15px; font-size: 12px; }
 .puzzle-stats { display: flex; gap: 18px; margin: 0 0 8px; color: #998f79; font-size: 10px; }
 .puzzle-stats b { font-weight: 500; color: #808967; }
@@ -175,8 +175,8 @@
 .reading-text { white-space: pre-line; font: 16px/2.2 var(--serif); color: #79785d; max-height: 430px; overflow-y: auto; overflow-wrap: anywhere; margin-top: 20px; }
 .reading-text:empty { margin-top: 0; }
 @media (max-width: 1050px) {
-  .life-stars.player-track { max-width: 180px; }
-  .life-star { font-size: 19px; }
+  .life-hearts.player-track { max-width: 180px; }
+  .life-heart { font-size: 19px; }
   .right-column { display: flex; }
   .reading-card { width: 100%; min-height: 100px; padding: 16px; }
   .reading-card h2 { font-size: 18px; margin-bottom: 4px; }
@@ -187,3 +187,13 @@
 /* Keep each confirmed sentence on one visual line, including its punctuation. */
 .reading-text, .learning-summary #completedPoemText { container-type: inline-size; min-width: 0; max-width: 100%; white-space: normal; overflow: auto; overflow-wrap: normal; }
 .reading-line { display: block; white-space: nowrap; overflow-wrap: normal; word-break: keep-all; font-size: 16px; font-size: clamp(11px, calc(100cqw / var(--line-chars)), 16px); line-height: 2.2; }
+
+/* Explain help on hover or keyboard focus without hiding the current puzzle. */
+.help-tooltip-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
+.help-tooltip { position: absolute; z-index: 20; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); width: 204px; padding: 12px 14px; border: 1px solid #b8a783; border-radius: 10px; background: #fffaf0; color: #856c43; box-shadow: 0 4px 14px #77674b20; font: 12px/1.7 system-ui; text-align: left; visibility: hidden; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.help-tooltip::before { content: ''; position: absolute; left: -6px; top: calc(50% - 5px); width: 10px; height: 10px; border-left: 1px solid #b8a783; border-bottom: 1px solid #b8a783; background: #fffaf0; transform: rotate(45deg); }
+.help-tooltip-wrap:hover .help-tooltip, .help-tooltip-wrap:focus-within .help-tooltip { visibility: visible; opacity: 1; }
+@media (max-width: 1050px) {
+  .help-tooltip { left: auto; right: 0; top: calc(100% + 10px); transform: none; }
+  .help-tooltip::before { left: auto; right: 24px; top: -6px; transform: rotate(135deg); }
+}

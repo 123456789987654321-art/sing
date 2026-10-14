@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=8d0a192ec68e" />
+  <link rel="stylesheet" href="modes.css?v=f3e59248b588" />
 </head>
 <body>
   <header class="topbar">
@@ -27,11 +27,11 @@
       <button class="text-button return-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
 
       <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2><span>作品随机排序 · 逐篇完整学习</span></div><div class="category-grid" id="categoryGrid"></div><p class="mode-note">每字 2 点伤害 · 帮助补一字，少 2 点伤害</p></section>
-      <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战 · 示例篇</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><p>按春、夏、秋、冬依次闯关<br><small>以诗句降服小妖，守住六颗星</small></p><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
+      <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战 · 示例篇</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><p>按春、夏、秋、冬依次闯关<br><small>以诗句降服小妖，守住六颗爱心</small></p><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
     </section>
     <section class="game-layout" id="gameScreen" hidden>
       <aside class="left-column">
-        <section class="paper player-card"><div class="section-label">我的诗途 <span>初入诗圈</span></div><div class="avatar">✎</div><h2>执笔小书生</h2><p>一卷诗书，一身少年气</p><div class="player-health-label"><span>生命</span><b id="playerHpText">6 / 6</b></div><div class="life-stars player-track" id="playerStars" aria-label="剩余 6 颗星"></div><div class="player-stats"><div><strong id="defeated">0</strong><span>降服妖怪</span></div></div></section>
+        <section class="paper player-card"><div class="section-label">我的诗途 <span>初入诗圈</span></div><div class="avatar">✎</div><h2>执笔小书生</h2><p>一卷诗书，一身少年气</p><div class="player-health-label"><span>生命</span><b id="playerHpText">6 / 6</b></div><div class="life-hearts player-track" id="playerHearts" aria-label="剩余 6 颗爱心"></div><div class="player-stats"><div><strong id="defeated">0</strong><span>降服妖怪</span></div></div></section>
         <section class="paper daily-card"><div class="section-label">今日诗签 <span>宜 · 吟诗</span></div><div class="poem-vertical">长风破浪会有时<br>直挂云帆济沧海</div><p>唐 · 李白《行路难》</p><span class="small-stamp">诗意常在</span></section>
       </aside>
 
@@ -48,7 +48,7 @@
           <span class="scene-caption">山林有小妖，待君以诗降。</span>
         </div>
         <div class="writing-area tile-arena">
-          <div class="puzzle-heading"><h3><span>✦</span> 选字成诗</h3><button class="puzzle-help" data-hint type="button">✧ 帮助</button></div><span class="sr-only" id="poemSource"></span>
+          <div class="puzzle-heading"><h3><span>✦</span> 选字成诗</h3><span class="help-tooltip-wrap"><button class="puzzle-help" data-hint type="button" aria-describedby="helpTooltip">✧ 帮助</button><span class="help-tooltip" id="helpTooltip" role="tooltip">每帮助一个字，这个字就没有攻击力</span></span></div><span class="sr-only" id="poemSource"></span>
           <p class="verse-clue" id="verseClue"></p>
           <div class="puzzle-stats"><span>本句帮助 <b id="hintCount">0 次</b></span><span>可造成伤害 <b id="potentialDamage">0 点</b></span></div>
           <section class="learning-summary" id="learningSummary" hidden><h3 id="completedPoemTitle"></h3><p id="completedPoemText"></p><button class="primary-button" id="nextPoem" type="button">下一篇 →</button></section>
@@ -64,10 +64,10 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式根据诗名和相邻一句拼出缺句。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗星。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗星。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗星；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。星星耗尽则本轮结束。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式根据诗名和相邻一句拼出缺句。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。爱心耗尽则本轮结束。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <script src="poems.js?v=474766f88c54"></script>
   <script src="curriculum.js?v=4fd71429c86d"></script>
-  <script src="game.js?v=ac11c065d842"></script>
+  <script src="game.js?v=11b36d06f984"></script>
 </body>
 </html>
