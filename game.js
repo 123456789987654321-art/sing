@@ -72,7 +72,6 @@ function render() {
   $('enemyHpBar').style.width=`${state.enemyHp/stage.hp*100}%`;
   $('playerHpText').textContent=`${state.hp} / 100`;
   $('playerHpBar').style.width=`${state.hp}%`;
-  $('score').textContent=state.score;
   $('defeated').textContent=state.defeated;
   $('monster').style.setProperty('--monster',stage.color);
   $('weaknessTip').innerHTML=`诗句中含「${stage.word}」字<br>可获得 <b>额外 20 点</b>伤害`;
