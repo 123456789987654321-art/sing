@@ -1,10 +1,3 @@
-const STAGES = [
-  { chapter:'第一章 · 山林初逢', name:'墨墨小妖', description:'偷吃诗书的小妖，最怕朗朗读书声。', hp:24, color:'#8d9980' },
-  { chapter:'第二章 · 花间寻踪', name:'花影小魅', description:'藏在落花里的小妖，等一首春日的诗。', hp:30, color:'#bca094' },
-  { chapter:'第三章 · 清风过岭', name:'风吟山魈', description:'山风吹乱了书页，快用诗句定住它。', hp:36, color:'#9ba99e' },
-  { chapter:'第四章 · 水墨江湖', name:'沧浪水灵', description:'江水载不走诗意，且以笔墨破浪。', hp:42, color:'#889ea6' },
-  { chapter:'第五章 · 诗镇千山', name:'千山墨王', description:'守着最后一卷诗书，等你拼出千古名句。', hp:50, color:'#a49bad' }
-];
 const $ = id => document.getElementById(id);
 const normalize = text => text.replace(/[^\u3400-\u9fff]/g, '');
 const QUESTIONS = POEMS.flatMap(poem => {
@@ -12,11 +5,12 @@ const QUESTIONS = POEMS.flatMap(poem => {
   return lines.flatMap((answer, index) => {
     if (answer.length < 4 || answer.length > 7) return [];
     const next = lines[index + 1];
-    return [{answer, source:`${poem[1]} · ${poem[2]}`, clue:next ? `下一句：${next}` : `上一句：${lines[index - 1]}`, category:poem[0]}];
+    return [{answer, source:`${poem[1]} · ${poem[2]}`, clue:next ? `下一句：${next}` : `上一句：${lines[index - 1]}`, category:poem[0], title:poem[2]}];
   });
 });
 const DISTRACTORS = [...new Set(POEMS.flatMap(poem => [...normalize(poem[3])]))];
-const SPEECHES = ['把散落的字，拼成一句诗吧！','花开花落，你还记得哪一句？','字序别乱，风声可不等人！','诗海无涯，接招吧！','最后一关，看你的真本事！'];
+const VOLUME = CHALLENGE_VOLUMES[0];
+let selectedMode = 'learning';
 let state, sound = false, audioContext, transitionTimer;
 
 function shuffled(values) {
@@ -28,11 +22,30 @@ function shuffled(values) {
   return result;
 }
 
+function currentStage() {
+  if (state.mode === 'challenge') return VOLUME.chapters[state.stage];
+  const category = LEARNING_CATEGORIES.find(item => item.name === state.category);
+  return {chapter:category.name, name:'伴读小妖', description:category.note,
+    hp:24, color:category.color, speech:'慢慢想，拼错了也可以再试！'};
+}
+
+function questionPool() {
+  return QUESTIONS.filter(question => state.mode === 'learning'
+    ? question.category === state.category : currentStage().titles.includes(question.title));
+}
+
+function prepareDeck() {
+  const pool = questionPool();
+  const opening = pool.find(question => question.answer === (state.mode === 'challenge'
+    ? currentStage().opening : state.category === '唐诗' ? '床前明月光' : pool[0]?.answer));
+  state.deck = opening ? [opening, ...shuffled(pool.filter(question => question !== opening))] : shuffled(pool);
+}
+
 function newPuzzle() {
-  if (!state.deck.length) state.deck = shuffled(QUESTIONS);
+  if (!state.deck.length) state.deck = shuffled(questionPool());
   state.question = state.deck.shift();
   const answer = [...state.question.answer];
-  // Preserve every occurrence of repeated characters; each tile can be used once.
+  // Each occurrence of a repeated character needs its own tile.
   const extras = shuffled(DISTRACTORS.filter(char => !answer.includes(char))).slice(0, 18 - answer.length);
   state.tiles = shuffled([...answer, ...extras]).map((char, id) => ({id, char}));
   state.selected = Array(answer.length).fill(null);
@@ -40,17 +53,65 @@ function newPuzzle() {
   state.wrongSlots = new Set();
 }
 
+function chooseMode(mode) {
+  selectedMode = mode;
+  $('modeTitle').textContent = mode === 'learning' ? '学习模式' : '挑战模式';
+  $('modeDescription').textContent = mode === 'learning' ? '从六卷诗文中，选一卷慢慢读。' : '循着四季的诗句，开启你的江湖。';
+  $('learningPanel').hidden = mode !== 'learning';
+  $('challengePanel').hidden = mode !== 'challenge';
+}
+
+function showModeSelection() {
+  clearTimeout(transitionTimer);
+  if (state) state.busy = true;
+  $('resultDialog').close();
+  $('gameScreen').hidden = true;
+  $('modeSelection').hidden = true;
+  $('entryScreen').hidden = false;
+  document.querySelector('[data-entry-mode="' + selectedMode + '"]').focus({preventScroll:true});
+  window.scrollTo(0, 0);
+}
+
+function startGame(mode, category = '唐诗') {
+  selectedMode = mode;
+  state = {mode, category};
+  $('entryScreen').hidden = true;
+  $('modeSelection').hidden = true;
+  $('gameScreen').hidden = false;
+  resetGame();
+  $('modeButton').focus({preventScroll:true});
+  window.scrollTo(0, 0);
+}
+
 function resetGame() {
   clearTimeout(transitionTimer);
-  const opening = QUESTIONS.find(question => question.answer === '床前明月光');
-  state = {stage:0, hp:100, enemyHp:STAGES[0].hp, score:0, defeated:0, solved:0, busy:false, over:false,
-    deck:[opening, ...shuffled(QUESTIONS.filter(question => question !== opening))]};
+  state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
+    stage:0, hp:100, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
+  state.enemyHp = currentStage().hp;
+  prepareDeck();
   newPuzzle();
   $('resultDialog').close();
   $('monster').classList.remove('hit');
   $('damage').classList.remove('show');
   feedback('');
   render();
+}
+
+function renderModeSelection() {
+  $('categoryGrid').replaceChildren();
+  LEARNING_CATEGORIES.forEach(category => {
+    const button = document.createElement('button');
+    button.className = 'category-card';
+    button.style.setProperty('--category-color', category.color);
+    const count = QUESTIONS.filter(question => question.category === category.name).length;
+    button.innerHTML = `<span class="category-mark">${category.mark}</span><strong>${category.name}</strong><span>${category.note}</span><small>${count} 句可练习 <b>↗</b></small>`;
+    button.addEventListener('click', () => startGame('learning', category.name));
+    $('categoryGrid').append(button);
+  });
+  $('volumeTitle').textContent = VOLUME.title;
+  $('volumeDescription').textContent = VOLUME.description;
+  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" style="--category-color:${chapter.color}"><span>${chapter.season}</span><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
+  chooseMode(selectedMode);
 }
 
 function selectedCharacter(index) {
@@ -65,9 +126,12 @@ function potentialDamage() {
 function controlsLocked() { return state.busy || state.over; }
 
 function render() {
-  const stage = STAGES[state.stage];
+  const stage = currentStage();
+  const learning = state.mode === 'learning';
+  $('volumeLabel').textContent = learning ? '学习模式' : VOLUME.title;
+  $('enemyHealthLabel').textContent = learning ? '练习' : '妖气';
   $('chapter').textContent = stage.chapter;
-  $('enemyName').innerHTML = `${stage.name} <span>${['壹','贰','叁','肆','伍'][state.stage]}</span>`;
+  $('enemyName').innerHTML = `${stage.name} <span>${learning ? '学' : ['壹','贰','叁','肆'][state.stage]}</span>`;
   $('enemyDescription').textContent = stage.description;
   $('enemyHpText').textContent = `${state.enemyHp} / ${stage.hp}`;
   $('enemyHpBar').style.width = `${state.enemyHp / stage.hp * 100}%`;
@@ -75,9 +139,10 @@ function render() {
   $('playerHpBar').style.width = `${state.hp}%`;
   $('defeated').textContent = state.defeated;
   $('monster').style.setProperty('--monster', stage.color);
-  $('stageProgress').innerHTML = STAGES.map((_,i) => `${i ? '<span class="stage-line"></span>' : ''}<span class="stage-node ${i === state.stage ? 'current' : i < state.stage ? 'completed' : ''}">${i < state.stage ? '✓' : i + 1}</span>`).join('');
+  $('stageProgress').hidden = learning;
+  $('stageProgress').innerHTML = VOLUME.chapters.map((_,i) => `${i ? '<span class="stage-line"></span>' : ''}<span class="stage-node ${i === state.stage ? 'current' : i < state.stage ? 'completed' : ''}">${i < state.stage ? '✓' : i + 1}</span>`).join('');
   $('comboText').textContent = state.solved ? `已成诗 ${state.solved} 句` : '点选文字，拼出第一句诗';
-  if (!state.busy) $('enemySpeech').textContent = SPEECHES[state.stage];
+  if (!state.busy) $('enemySpeech').textContent = stage.speech;
   renderPuzzle();
 }
 
@@ -99,6 +164,7 @@ function renderPuzzle() {
     button.disabled = locked || assisted || tileId === null;
     button.setAttribute('aria-label', `第 ${index + 1} 字${tileId === null ? '待选' : `：${state.tiles[tileId].char}`}${assisted ? '，帮助补字，不计伤害' : '，点击撤回'}`);
     button.setAttribute('aria-invalid', String(incorrect));
+    if (incorrect) button.setAttribute('aria-label', button.getAttribute('aria-label') + '，错误');
     button.addEventListener('click', () => removeCharacter(index));
     $('answerSlots').append(button);
   });
@@ -107,7 +173,8 @@ function renderPuzzle() {
     const button = document.createElement('button');
     const used = state.selected.includes(tile.id);
     button.type = 'button';
-    button.className = `character-tile${used ? ' used' : ''}`;
+    const incorrect = state.wrongSlots.has(state.selected.indexOf(tile.id));
+    button.className = `character-tile${used ? ' used' : ''}${incorrect ? ' incorrect' : ''}`;
     button.textContent = tile.char;
     button.dataset.tileId = tile.id;
     button.disabled = locked || used || !state.selected.includes(null);
@@ -200,11 +267,16 @@ function attack() {
     if (state.enemyHp === 0) {
       state.defeated++;
       state.hp = Math.min(100, state.hp + 20);
-      if (state.stage === STAGES.length - 1) { finish(true); return; }
-      state.stage++;
-      state.enemyHp = STAGES[state.stage].hp;
-      feedback('✦ 小妖已降服，恢复 20 点元气。继续选字出招！', 'success');
-    } else {
+      if (state.mode === 'challenge') {
+        if (state.stage === VOLUME.chapters.length - 1) { finish(true); return; }
+        state.stage++;
+        prepareDeck();
+        feedback('✦ 小妖已降服，恢复 20 点元气。进入' + currentStage().chapter + '！', 'success');
+      } else {
+        feedback('✦ 又完成一轮练习！继续读这一类诗文吧。', 'success');
+      }
+      state.enemyHp = currentStage().hp;
+    } else if (state.mode === 'challenge') {
       state.hp = Math.max(0, state.hp - 4);
       if (state.hp === 0) { finish(false); return; }
     }
@@ -219,7 +291,7 @@ function finish(won) {
   state.busy = false;
   render();
   $('resultTitle').textContent = won ? '诗出有名，名满诗圈！' : '歇一歇，再来拼诗';
-  $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '五关已过，每一个字都有力量。' : '少用一次帮助，就能多造成 2 点伤害。'}`;
+  $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '四季篇四章已过，每一个字都有力量。' : '少用一次帮助，就能多造成 2 点伤害。'}`;
   $('resultDialog').showModal();
 }
 
@@ -251,4 +323,17 @@ $('soundButton').addEventListener('click', () => {
   $('soundButton').setAttribute('aria-label', $('soundButton').title);
   if (sound) playTone();
 });
-resetGame();
+document.querySelectorAll('[data-entry-mode]').forEach(button => {
+  button.addEventListener('click', () => {
+    chooseMode(button.dataset.entryMode);
+    $('entryScreen').hidden = true;
+    $('modeSelection').hidden = false;
+    $('entryBack').focus({preventScroll:true});
+    window.scrollTo(0, 0);
+  });
+});
+$('entryBack').addEventListener('click', showModeSelection);
+$('startChallenge').addEventListener('click', () => startGame('challenge'));
+$('modeButton').addEventListener('click', showModeSelection);
+$('resultModeButton').addEventListener('click', showModeSelection);
+renderModeSelection();

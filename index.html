@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="layout.css" />
   <link rel="stylesheet" href="tiles.css" />
+  <link rel="stylesheet" href="modes.css" />
 </head>
 <body>
   <header class="topbar">
@@ -16,22 +17,34 @@
   </header>
 
   <main>
-    <section class="game-layout">
+    <section class="entry-screen" id="entryScreen" aria-labelledby="entryTitle">
+      <div class="entry-decoration" aria-hidden="true"><span>诗</span><i></i></div>
+      <div class="entry-content"><span class="mode-kicker">一卷诗书 · 一场奇遇</span><h1 id="entryTitle">诗出有名</h1><p class="entry-subtitle">以诗为剑，赴一场诗意江湖。</p>
+      <div class="entry-actions"><button class="entry-button entry-learning" data-entry-mode="learning"><span class="entry-icon" aria-hidden="true">书</span><span><strong>学习模式</strong><small>读六卷诗文，慢慢学会每一句</small></span><b aria-hidden="true">↗</b></button><button class="entry-button entry-challenge" data-entry-mode="challenge"><span class="entry-icon" aria-hidden="true">战</span><span><strong>挑战模式</strong><small>循四季篇章，以诗句降服小妖</small></span><b aria-hidden="true">↗</b></button></div>
+      <p class="entry-note">不必字字珠玑，只愿句句有诗意</p></div>
+    </section>
+    <section class="mode-selection" id="modeSelection" hidden aria-labelledby="modeTitle">
+      <button class="text-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
+
+      <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2><span>点击类别，开始选字拼诗</span></div><div class="category-grid" id="categoryGrid"></div><p class="mode-note">每字 2 点伤害 · 帮助补一字，少 2 点伤害</p></section>
+      <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战 · 示例篇</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><p>按春、夏、秋、冬依次闯关<br><small>怪物会反击，降服后恢复元气</small></p><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
+    </section>
+    <section class="game-layout" id="gameScreen" hidden>
       <aside class="left-column">
         <section class="paper player-card"><div class="section-label">我的诗途 <span>初入诗圈</span></div><div class="avatar">✎</div><h2>执笔小书生</h2><p>一卷诗书，一身少年气</p><div class="player-health-label"><span>♥ 元气</span><b id="playerHpText">100 / 100</b></div><div class="health-track player-track"><div id="playerHpBar"></div></div><div class="player-stats"><div><strong id="defeated">0</strong><span>降服妖怪</span></div></div></section>
         <section class="paper daily-card"><div class="section-label">今日诗签 <span>宜 · 吟诗</span></div><div class="poem-vertical">长风破浪会有时<br>直挂云帆济沧海</div><p>唐 · 李白《行路难》</p><span class="small-stamp">诗意常在</span></section>
       </aside>
 
       <section class="battle paper">
-        <div class="battle-top"><span class="chapter" id="chapter">第一章 · 山林初逢</span><button id="resetButton" class="text-button">↻ 重新开始</button></div>
+        <div class="battle-top"><div class="battle-route"><span id="volumeLabel"></span><span class="chapter" id="chapter"></span></div><div class="battle-tools"><button id="modeButton" class="text-button">← 返回入口</button><button id="resetButton" class="text-button">↻ 重来</button></div></div>
         <div class="stage-progress" id="stageProgress" aria-label="关卡进度"></div>
         <div class="enemy-heading"><h2 id="enemyName">墨墨小妖 <span>壹</span></h2><p id="enemyDescription">偷吃诗书的小妖，最怕朗朗读书声。</p></div>
-        <div class="enemy-health"><span>妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">24 / 24</b></div>
+        <div class="enemy-health"><span id="enemyHealthLabel">妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">24 / 24</b></div>
         <div class="scene" id="scene">
           <div class="scene-sun"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div><span class="scene-leaf leaf-one">❧</span><span class="scene-leaf leaf-two">❧</span><span class="scene-cloud">〜</span>
-          <div class="speech" id="enemySpeech">哼，没点诗意可过不了我这关！</div>
-          <div class="monster" id="monster"><div class="ear ear-left"></div><div class="ear ear-right"></div><div class="monster-body"><i class="brow brow-left"></i><i class="brow brow-right"></i><i class="eye eye-left"></i><i class="eye eye-right"></i><i class="blush blush-left"></i><i class="blush blush-right"></i><div class="mouth"></div><div class="belly">墨</div></div><div class="foot foot-left"></div><div class="foot foot-right"></div></div>
-          <div class="monster-shadow"></div><div id="damage" class="damage" aria-live="polite"></div><div class="ground-line"></div>
+          <div class="encounter"><div class="speech" id="enemySpeech">哼，没点诗意可过不了我这关！</div>
+          <div class="monster-anchor"><div class="monster" id="monster"><div class="ear ear-left"></div><div class="ear ear-right"></div><div class="monster-body"><i class="brow brow-left"></i><i class="brow brow-right"></i><i class="eye eye-left"></i><i class="eye eye-right"></i><i class="blush blush-left"></i><i class="blush blush-right"></i><div class="mouth"></div><div class="belly">墨</div></div><div class="foot foot-left"></div><div class="foot foot-right"></div></div>
+          <div class="monster-shadow"></div></div></div><div id="damage" class="damage" aria-live="polite"></div><div class="ground-line"></div>
           <span class="scene-caption">山林有小妖，待君以诗降。</span>
         </div>
         <div class="writing-area tile-arena">
@@ -49,9 +62,10 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>根据诗名和相邻一句，从打乱的文字块中按顺序拼出缺少的诗句，再点击「以诗出招」。</p><ul><li>每个自行选出的字造成 2 点伤害，没有其他伤害加成。</li><li>每次「帮助」补正一个字，固定该位置，并扣除这个字的 2 点伤害。</li><li>例如「床前明月光」为 10 点伤害，帮助 1 次后为 8 点；全部帮助则为 0 点。</li><li>点已选的字可撤回；「重选」只清除自己选的字，帮助扣除的伤害不会恢复。</li><li>拼错可以重试，不扣元气。拼对后存活的小妖反击 4 点元气，包括 0 伤害的出招。</li><li>击败小妖恢复 20 点元气，闯过五关即获胜。</li></ul><button class="primary-button dialog-close-action">开始选字</button></dialog>
-  <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>根据诗名和相邻一句，从打乱的文字块中按顺序拼出缺少的诗句，再点击「以诗出招」。</p><ul><li>学习模式可选诗经、楚辞、汉赋、唐诗、宋词、元曲，不扣元气，可反复练习。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>挑战中拼对后，存活的小妖反击 4 点元气，包括 0 伤害的出招。降服后恢复 20 点元气。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式，重新进入会开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <script src="poems.js"></script>
+  <script src="curriculum.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
