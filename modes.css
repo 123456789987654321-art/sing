@@ -155,3 +155,10 @@
   .sentence-punctuation { font-size: 19px; }
   .learned-verses { font-size: 12px; max-height: 72px; }
 }
+
+#saveLearning:disabled { opacity: .5; cursor: default; transform: none; }
+@media (max-width: 600px) {
+  .learning-game .battle-top { align-items: flex-start; }
+  .learning-game .battle-tools { flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 220px; }
+  .learning-game .battle-route { flex-shrink: 0; }
+}

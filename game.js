@@ -5,7 +5,11 @@ const LEARNING_WORKS = POEMS.filter(poem => !poem[2].includes('节选')).map(poe
   category:poem[0], author:poem[1], title:poem[2], text:poem[3],
   sentences:(poem[3].match(/[^。！？!?]+[。！？!?]?/gu) || []).map(text => text.trim()).filter(text => normalize(text))
 }));
-function learningWorks() { return LEARNING_WORKS.filter(work => work.category === state.category); }
+function categoryWorks(category) { return LEARNING_WORKS.filter(work => work.category === category); }
+function learningWorks() {
+  const works = categoryWorks(state.category);
+  return state.workOrder ? state.workOrder.map(title => works.find(work => work.title === title)) : works;
+}
 function learningWork() { return learningWorks()[state.workIndex]; }
 const QUESTIONS = POEMS.flatMap(poem => {
   const lines = poem[3].split(/[，。！？；、]/).map(normalize).filter(Boolean);
@@ -27,6 +31,80 @@ function shuffled(values) {
     [result[i], result[j]] = [result[j], result[i]];
   }
   return result;
+}
+
+const learningSaveKey = category => `poetry-learning-v1:${category}`;
+function freshLearningOrder(category) {
+  const order = shuffled(categoryWorks(category).map(work => work.title));
+  try {
+    const key = `poetry-last-order:${category}`;
+    const previous = JSON.parse(localStorage.getItem(key) || 'null');
+    if (order.length > 1 && JSON.stringify(previous) === JSON.stringify(order)) order.push(order.shift());
+    localStorage.setItem(key, JSON.stringify(order));
+  } catch { /* Private browsing may disable storage; learning still works. */ }
+  return order;
+}
+
+function saveLearningProgress() {
+  if (state.mode !== 'learning' || state.busy || state.over) return;
+  const save = {version:1, category:state.category, order:state.workOrder,
+    workIndex:state.workIndex, sentenceIndex:state.sentenceIndex, poemComplete:state.poemComplete,
+    sentence:state.question.sentence, tiles:state.tiles.map(tile => tile.char), selected:state.selected,
+    assisted:[...state.assisted], wrongSlots:[...state.wrongSlots], score:state.score,
+    defeated:state.defeated, enemyHp:state.enemyHp};
+  try {
+    localStorage.setItem(learningSaveKey(state.category), JSON.stringify(save));
+    feedback('进度已保存在此浏览器，下次进入这一类会按原顺序继续。', 'success');
+  } catch {
+    feedback('浏览器未能保存进度，请检查是否允许网站存储。', 'error');
+  }
+}
+
+function restoreLearningProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(learningSaveKey(state.category)) || 'null');
+    if (!saved) return;
+    const works = categoryWorks(state.category);
+    const inRange = (value, max) => Number.isInteger(value) && value >= 0 && value < max;
+    if (saved.version !== 1 || saved.category !== state.category || !Array.isArray(saved.order)
+      || saved.order.length !== works.length || new Set(saved.order).size !== works.length
+      || !saved.order.every(title => works.some(work => work.title === title))
+      || !inRange(saved.workIndex, works.length)) return;
+    const work = works.find(work => work.title === saved.order[saved.workIndex]);
+    if (!inRange(saved.sentenceIndex, work.sentences.length)
+      || saved.sentence !== work.sentences[saved.sentenceIndex]) return;
+    const answer = [...normalize(saved.sentence)];
+    if (!Array.isArray(saved.tiles) || saved.tiles.length !== Math.max(18, answer.length + 4)
+      || !saved.tiles.every(char => typeof char === 'string' && [...char].length === 1 && isHan(char))
+      || !answer.every(char => saved.tiles.filter(c => c === char).length >= answer.filter(c => c === char).length)
+      || !Array.isArray(saved.selected) || saved.selected.length !== answer.length
+      || !saved.selected.every(id => id === null || inRange(id, saved.tiles.length))) return;
+    const used = saved.selected.filter(id => id !== null);
+    if (new Set(used).size !== used.length || !Array.isArray(saved.assisted) || !Array.isArray(saved.wrongSlots)
+      || !saved.assisted.every(index => inRange(index, answer.length) && saved.tiles[saved.selected[index]] === answer[index])
+      || !saved.wrongSlots.every(index => inRange(index, answer.length) && saved.selected[index] !== null && saved.tiles[saved.selected[index]] !== answer[index])) return;
+    if (typeof saved.poemComplete !== 'boolean' || (saved.poemComplete && (saved.sentenceIndex !== work.sentences.length - 1
+      || !answer.every((char,index) => saved.tiles[saved.selected[index]] === char)))) return;
+    if (![saved.score, saved.defeated, saved.enemyHp].every(value => Number.isSafeInteger(value) && value >= 0)
+      || saved.enemyHp > currentStage().hp) return;
+    state.workOrder = saved.order;
+    state.workIndex = saved.workIndex;
+    state.sentenceIndex = saved.sentenceIndex;
+    state.poemComplete = saved.poemComplete;
+    state.completedWorks = saved.workIndex + Number(saved.poemComplete);
+    state.solved = learningWorks().slice(0, saved.workIndex).reduce((sum,item) => sum + item.sentences.length, 0)
+      + saved.sentenceIndex + Number(saved.poemComplete);
+    state.score = saved.score;
+    state.defeated = saved.defeated;
+    state.enemyHp = saved.enemyHp;
+    newPuzzle();
+    state.tiles = saved.tiles.map((char,id) => ({id,char}));
+    state.selected = saved.selected;
+    state.assisted = new Set(saved.assisted);
+    state.wrongSlots = new Set(saved.wrongSlots);
+    feedback('已接着上次保存的位置学习，作品顺序和已填文字均已恢复。', 'success');
+    render();
+  } catch { /* Ignore unavailable or outdated saves and start a fresh round. */ }
 }
 
 function currentStage() {
@@ -93,6 +171,7 @@ function startGame(mode, category = '唐诗') {
   $('modeSelection').hidden = true;
   $('gameScreen').hidden = false;
   resetGame();
+  if (mode === 'learning') restoreLearningProgress();
   $('modeButton').focus({preventScroll:true});
   window.scrollTo(0, 0);
 }
@@ -100,8 +179,9 @@ function startGame(mode, category = '唐诗') {
 function resetGame() {
   clearTimeout(transitionTimer);
   state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
-    workIndex:0, sentenceIndex:0, completedWorks:0, poemComplete:false, stage:0, hp:100, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
+    workOrder:null, workIndex:0, sentenceIndex:0, completedWorks:0, poemComplete:false, stage:0, hp:100, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
+  if (state.mode === 'learning') state.workOrder = freshLearningOrder(state.category);
   if (state.mode === 'challenge') prepareDeck();
   newPuzzle();
   $('resultDialog').close();
@@ -142,6 +222,9 @@ function controlsLocked() { return state.busy || state.over || state.poemComplet
 function render() {
   const stage = currentStage();
   const learning = state.mode === 'learning';
+  $('saveLearning').hidden = !learning;
+  $('saveLearning').disabled = state.busy || state.over;
+  $('resetButton').textContent = learning ? '↻ 新一轮' : '↻ 重来';
   $('volumeLabel').textContent = learning ? '学习模式' : VOLUME.title;
   $('enemyHealthLabel').textContent = learning ? '练习' : '妖气';
   $('chapter').textContent = stage.chapter;
@@ -390,6 +473,7 @@ function playTone(victory = false) {
   } catch { /* Sound is optional. */ }
 }
 
+$('saveLearning').addEventListener('click', saveLearningProgress);
 $('nextPoem').addEventListener('click', nextLearningWork);
 $('attackButton').addEventListener('click', attack);
 $('clearButton').addEventListener('click', clearSelection);

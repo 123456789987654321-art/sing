@@ -8,11 +8,11 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=6e94a1cb220e" />
+  <link rel="stylesheet" href="modes.css?v=da65010e09f9" />
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="./index.html"><span class="brand-seal">诗</span><span>诗出有名 · 以诗为剑</span></a>
+    <div class="brand"><span class="brand-seal">诗</span><span>诗出有名 · 以诗为剑</span></div>
     <nav><span class="nav-caption">一场与诗词的奇遇</span><button class="icon-button" id="soundButton" title="开启音效" aria-label="开启音效">♪<span class="sound-off">/</span></button><button class="icon-button" id="helpButton" title="玩法说明" aria-label="玩法说明">?</button></nav>
   </header>
 
@@ -26,7 +26,7 @@
     <section class="mode-selection" id="modeSelection" hidden aria-labelledby="modeTitle">
       <button class="text-button return-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
 
-      <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2><span>选一类，逐篇学完整诗文</span></div><div class="category-grid" id="categoryGrid"></div><p class="mode-note">每字 2 点伤害 · 帮助补一字，少 2 点伤害</p></section>
+      <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2><span>作品随机排序 · 逐篇完整学习</span></div><div class="category-grid" id="categoryGrid"></div><p class="mode-note">每字 2 点伤害 · 帮助补一字，少 2 点伤害</p></section>
       <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战 · 示例篇</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><p>按春、夏、秋、冬依次闯关<br><small>怪物会反击，降服后恢复元气</small></p><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
     </section>
     <section class="game-layout" id="gameScreen" hidden>
@@ -36,7 +36,7 @@
       </aside>
 
       <section class="battle paper">
-        <div class="battle-top"><div class="battle-route"><span id="volumeLabel"></span><span class="chapter" id="chapter"></span></div><div class="battle-tools"><button id="modeButton" class="text-button return-button">← 返回入口</button><button id="resetButton" class="text-button">↻ 重来</button></div></div>
+        <div class="battle-top"><div class="battle-route"><span id="volumeLabel"></span><span class="chapter" id="chapter"></span></div><div class="battle-tools"><button id="saveLearning" class="text-button return-button" type="button" hidden>保存进度</button><button id="modeButton" class="text-button return-button">← 返回入口</button><button id="resetButton" class="text-button">↻ 重来</button></div></div>
         <div class="stage-progress" id="stageProgress" aria-label="关卡进度"></div>
         <div class="enemy-heading"><h2 id="enemyName">墨墨小妖 <span>壹</span></h2><p id="enemyDescription">偷吃诗书的小妖，最怕朗朗读书声。</p></div>
         <div class="enemy-health"><span id="enemyHealthLabel">妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">24 / 24</b></div>
@@ -64,10 +64,10 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式根据诗名和相邻一句拼出缺句。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，按作品顺序逐篇学习。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，不扣元气。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>挑战中拼对后，存活的小妖反击 4 点元气，包括 0 伤害的出招。降服后恢复 20 点元气。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式，重新进入会开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式根据诗名和相邻一句拼出缺句。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，不扣元气。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>挑战中拼对后，存活的小妖反击 4 点元气，包括 0 伤害的出招。降服后恢复 20 点元气。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式，重新进入会开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <script src="poems.js?v=474766f88c54"></script>
   <script src="curriculum.js?v=4fd71429c86d"></script>
-  <script src="game.js?v=a2efa0382d7d"></script>
+  <script src="game.js?v=4163060292f1"></script>
 </body>
 </html>
