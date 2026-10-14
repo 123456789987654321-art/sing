@@ -8,6 +8,9 @@ services:
     autoDeployTrigger: commit
     headers:
       - path: /*
+        name: Cache-Control
+        value: no-cache, max-age=0, must-revalidate
+      - path: /*
         name: X-Content-Type-Options
         value: nosniff
       - path: /*

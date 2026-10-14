@@ -41,3 +41,7 @@
 也可以选择 **New → Static Site** 手动连接仓库：Build Command 填 `echo "Static site ready"`，Publish Directory 填 `.`，Root Directory 留空，开启 Auto-Deploy。
 
 站点由 Render 托管，不需要本机保持开机、开放端口或配置局域网。后续推送 GitHub 会自动更新。公网访问仍取决于访问者网络能否连接 Render，并不保证所有地区或网络均可访问。
+
+## 更新与缓存
+
+HTML 中的本地 CSS/JS 引用带内容摘要版本参数，防止部署时旧页面资源缓存与新脚本混用。修改对应资源时，同步更新其 `?v=` 参数（文件 SHA-256 的前 12 位）。Render Blueprint 配置要求资源每次使用前重新验证缓存；已有手动创建的站点需同步配置 `Cache-Control: no-cache, max-age=0, must-revalidate` 响应头。

@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#eee5cf" />
   <title>诗出有名 · 以诗为剑</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="layout.css" />
-  <link rel="stylesheet" href="tiles.css" />
-  <link rel="stylesheet" href="modes.css" />
+  <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
+  <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
+  <link rel="stylesheet" href="tiles.css?v=870683788c18" />
+  <link rel="stylesheet" href="modes.css?v=9b14b09f5b68" />
 </head>
 <body>
   <header class="topbar">
@@ -58,14 +58,14 @@
         <div class="battle-footer"><span><i class="status-dot"></i> 每个自行选出的字 · 2 点伤害</span><span id="comboText">让第一句诗，开启你的江湖</span></div>
       </section>
 
-      <aside class="right-column"><section class="paper assistance-card"><div class="section-label">帮助 <span>借一字诗意</span></div><div class="help-emblem">✧</div><h3>想不起，就补一字</h3><p>每次帮助补上一个正确文字块。<br>补出的字不计入攻击伤害。</p><button class="primary-button" data-hint type="button">帮助 · 补一个字</button><div class="assist-tally"><span>本句已帮助</span><b id="hintCount">0 次</b></div><div class="assist-tally"><span>本句最高伤害</span><b id="potentialDamage">10 点</b></div><p class="assist-example">「床前明月光」共 5 字<br>不使用帮助：10 点伤害<br>帮助 1 次：8 点伤害</p></section><section class="paper tile-guide"><div class="section-label">选字小记 <span>✎</span></div><p>按顺序点击文字块，拼成题目中的诗句。</p><p>点已选的字可以撤回；带「助」的字已固定，不会恢复伤害。</p></section></aside>
+      <aside class="right-column"><section class="paper assistance-card"><div class="section-label">帮助 <span>借一字诗意</span></div><div class="help-emblem">✧</div><h3>想不起，就补一字</h3><p>每次帮助补上一个正确文字块。<br>补出的字不计入攻击伤害。</p><button class="primary-button" data-hint type="button">帮助 · 补一个字</button><div class="assist-tally"><span>本句已帮助</span><b id="hintCount">0 次</b></div><div class="assist-tally"><span>本句最高伤害</span><b id="potentialDamage">10 点</b></div></section><section class="paper tile-guide"><div class="section-label">选字小记 <span>✎</span></div><p>按顺序点击文字块，拼成题目中的诗句。</p><p>点已选的字可以撤回；带「助」的字已固定，不会恢复伤害。</p></section></aside>
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
   <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>根据诗名和相邻一句，从打乱的文字块中按顺序拼出缺少的诗句，再点击「以诗出招」。</p><ul><li>学习模式可选诗经、楚辞、汉赋、唐诗、宋词、元曲，不扣元气，可反复练习。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>挑战中拼对后，存活的小妖反击 4 点元气，包括 0 伤害的出招。降服后恢复 20 点元气。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式，重新进入会开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
-  <script src="poems.js"></script>
-  <script src="curriculum.js"></script>
-  <script src="game.js"></script>
+  <script src="poems.js?v=2621e5f9f3dd"></script>
+  <script src="curriculum.js?v=4fd71429c86d"></script>
+  <script src="game.js?v=9969eed617cc"></script>
 </body>
 </html>
