@@ -239,8 +239,9 @@ function render() {
   $('enemyHpText').textContent = `${state.enemyHp} / ${stage.hp}`;
   $('enemyHpBar').style.width = `${state.enemyHp / stage.hp * 100}%`;
   $('playerHpText').textContent = `${state.hp} / 6`;
-  $('playerHearts').setAttribute('aria-label', `剩余 ${state.hp} 颗爱心，共 6 颗`);
-  $('playerHearts').innerHTML = Array.from({length:6}, (_,index) => `<span class="life-heart${index < state.hp ? '' : ' lost'}" aria-hidden="true">♥</span>`).join('');
+  const hearts = $('playerHearts') || $('playerStars');
+  hearts.setAttribute('aria-label', `剩余 ${state.hp} 颗爱心，共 6 颗`);
+  hearts.innerHTML = Array.from({length:6}, (_,index) => `<span class="life-heart${index < state.hp ? '' : ' lost'}" aria-hidden="true">♥</span>`).join('');
   $('defeated').textContent = state.defeated;
   $('monster').style.setProperty('--monster', stage.color);
   $('stageProgress').hidden = learning;
