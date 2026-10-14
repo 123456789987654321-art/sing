@@ -35,7 +35,6 @@
 .battle-tools { display: flex; gap: 12px; flex-shrink: 0; }
 .battle-top { gap: 10px; }
 .result-mode-button { margin-top: 20px; }
-.character-tile.used.incorrect { color: #ac3029; background: #fae5df; border: 2px solid #bd4c43; }
 .answer-slot.incorrect { color: #ac3029; border-color: #bd4c43; }
 .feedback.error { color: #ac3029; }
 
@@ -161,4 +160,26 @@
   .learning-game .battle-top { align-items: flex-start; }
   .learning-game .battle-tools { flex-wrap: wrap; justify-content: flex-end; gap: 6px; max-width: 220px; }
   .learning-game .battle-route { flex-shrink: 0; }
+}
+
+/* Six lives and a poem manuscript revealed only after correct submissions. */
+.life-stars.player-track { display: flex; align-items: center; justify-content: space-between; gap: 5px; height: auto; max-width: none; background: none; }
+.life-star { font-size: 27px; line-height: 1.2; color: #c09c54; text-shadow: 0 1px #fff8de; }
+.life-star.lost { color: #d9d3c4; text-shadow: none; }
+.puzzle-help { border: 1px solid #c3b18c; border-radius: 7px; background: #f5ecd6; color: #856c43; padding: 6px 15px; font-size: 12px; }
+.puzzle-stats { display: flex; gap: 18px; margin: 0 0 8px; color: #998f79; font-size: 10px; }
+.puzzle-stats b { font-weight: 500; color: #808967; }
+.reading-card { padding: 24px 20px; min-height: 180px; }
+.reading-card h2 { margin: 0 0 10px; text-align: center; font: 600 21px/1.6 var(--serif); }
+.reading-card > p { margin: 0; text-align: center; font-size: 12px; color: #9a8f78; }
+.reading-text { white-space: pre-line; font: 16px/2.2 var(--serif); color: #79785d; max-height: 430px; overflow-y: auto; overflow-wrap: anywhere; margin-top: 20px; }
+.reading-text:empty { margin-top: 0; }
+@media (max-width: 1050px) {
+  .life-stars.player-track { max-width: 180px; }
+  .life-star { font-size: 19px; }
+  .right-column { display: flex; }
+  .reading-card { width: 100%; min-height: 100px; padding: 16px; }
+  .reading-card h2 { font-size: 18px; margin-bottom: 4px; }
+  .reading-text { max-height: 240px; margin-top: 12px; font-size: 14px; }
+  .right-column .tile-guide { display: none; }
 }
