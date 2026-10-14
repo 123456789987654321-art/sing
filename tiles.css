@@ -9,6 +9,7 @@
 .answer-slot { position: relative; height: 40px; min-width: 0; border: 1px dashed #cbc5ae; border-radius: 8px; background: #f4f0e2; color: #b8ae95; font: 600 22px var(--serif); }
 .answer-slot.filled { background: #edf0de; border: 1px solid #a5af87; color: #61734b; box-shadow: 0 2px 0 #c4cbb1; }
 .answer-slot.assisted { background: #f5e9cf; border-color: #c4a57c; color: #99734a; }
+.answer-slot.incorrect { background: #fae5df; border: 2px solid #c16f63; color: #b04439; box-shadow: 0 2px 0 #d6a398; }
 .answer-slot.assisted::after { content: '助'; position: absolute; right: 2px; top: 0; font: 8px/1.2 system-ui; color: #a27b4e; }
 .answer-slot:disabled { cursor: default; }
 .character-bank { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
@@ -34,7 +35,9 @@
 .battle .scene { height: 155px; min-height: 155px; flex: 0 0 auto; }
 .battle .monster { scale: .8; bottom: 10px; }
 .battle .monster-shadow, .battle .ground-line { bottom: 10px; }
-.battle .speech { top: 20px; font-size: 10px; padding: 12px; width: 160px; max-width: calc(50% - 80px); }
+.battle .speech { --bubble-gap: 70px; top: 16px; left: auto; right: calc(50% + var(--bubble-gap)); font-size: 10px; line-height: 1.5; padding: 14px 12px 28px; width: 170px; max-width: calc(50% - var(--bubble-gap) - 6px); min-height: 76px; border: 0; border-radius: 0; background: transparent; isolation: isolate; }
+.battle .speech::before { content: ''; position: absolute; inset: 0; width: 100%; height: 100%; background: url('./speech-bubble.svg') center / 100% 100% no-repeat; clip-path: none; transform: none; z-index: -1; }
+.battle .speech::after { display: none; }
 .battle .scene-sun { width: 58px; height: 58px; top: 18px; }
 .battle .enemy-heading p { display: none; }
 .battle .stage-progress { margin: 7px 0; }
@@ -55,7 +58,7 @@
 @media (min-width: 1051px) and (min-height: 900px) {
   .battle .scene { height: 200px; min-height: 200px; }
   .battle .monster { scale: 1.05; }
-  .battle .speech { top: 26px; font-size: 12px; }
+  .battle .speech { --bubble-gap: 86px; top: 24px; width: 190px; font-size: 12px; }
   .character-tile { height: 50px; font-size: 26px; }
   .answer-slot { height: 44px; }
   .character-bank { gap: 8px; }
@@ -77,7 +80,7 @@
   .hint-action small { font-size: 8px; margin-left: 2px; }
   .battle .scene { height: 135px; min-height: 135px; }
   .battle .monster { scale: .7; }
-  .battle .speech { top: 17px; max-width: calc(50% - 68px); padding: 10px 8px; font-size: 9px; }
+  .battle .speech { --bubble-gap: 62px; top: 14px; padding: 12px 10px 24px; font-size: 9px; min-height: 70px; }
   .battle .battle-footer { padding: 7px 14px; }
 }
 @media (max-height: 740px) {
@@ -86,7 +89,7 @@
   .battle .scene { height: 105px; min-height: 105px; }
   .battle .monster { scale: .57; bottom: 8px; }
   .battle .monster-shadow, .battle .ground-line { bottom: 8px; }
-  .battle .speech { top: 12px; width: 145px; max-width: calc(50% - 65px); padding: 8px; font-size: 9px; }
+  .battle .speech { --bubble-gap: 52px; top: 8px; width: 145px; padding: 10px 9px 22px; font-size: 9px; min-height: 65px; }
   .battle .scene-leaf { font-size: 55px; }
   .answer-slot { height: 32px; font-size: 20px; }
   .character-tile { height: 34px; font-size: 21px; }

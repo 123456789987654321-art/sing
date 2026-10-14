@@ -37,6 +37,7 @@ function newPuzzle() {
   state.tiles = shuffled([...answer, ...extras]).map((char, id) => ({id, char}));
   state.selected = Array(answer.length).fill(null);
   state.assisted = new Set();
+  state.wrongSlots = new Set();
 }
 
 function resetGame() {
@@ -91,11 +92,13 @@ function renderPuzzle() {
   state.selected.forEach((tileId, index) => {
     const button = document.createElement('button');
     const assisted = state.assisted.has(index);
+    const incorrect = state.wrongSlots.has(index);
     button.type = 'button';
-    button.className = `answer-slot ${tileId === null ? 'empty' : 'filled'}${assisted ? ' assisted' : ''}`;
+    button.className = `answer-slot ${tileId === null ? 'empty' : 'filled'}${assisted ? ' assisted' : ''}${incorrect ? ' incorrect' : ''}`;
     button.textContent = tileId === null ? '·' : state.tiles[tileId].char;
     button.disabled = locked || assisted || tileId === null;
     button.setAttribute('aria-label', `第 ${index + 1} 字${tileId === null ? '待选' : `：${state.tiles[tileId].char}`}${assisted ? '，帮助补字，不计伤害' : '，点击撤回'}`);
+    button.setAttribute('aria-invalid', String(incorrect));
     button.addEventListener('click', () => removeCharacter(index));
     $('answerSlots').append(button);
   });
@@ -124,18 +127,21 @@ function selectCharacter(tileId) {
   const index = state.selected.indexOf(null);
   if (index === -1) return;
   state.selected[index] = tileId;
+  state.wrongSlots.delete(index);
   feedback('');
   renderPuzzle();
 }
 function removeCharacter(index) {
   if (controlsLocked() || state.assisted.has(index)) return;
   state.selected[index] = null;
+  state.wrongSlots.delete(index);
   feedback('');
   renderPuzzle();
 }
 function clearSelection() {
   if (controlsLocked()) return;
   state.selected = state.selected.map((id,index) => state.assisted.has(index) ? id : null);
+  state.wrongSlots.clear();
   feedback(state.assisted.size ? '自行选择的字已退回，帮助补出的字继续保留。' : '');
   renderPuzzle();
 }
@@ -152,9 +158,11 @@ function useHint() {
     if (donor === -1) return;
     tile = state.tiles[state.selected[donor]];
     state.selected[donor] = null;
+    state.wrongSlots.delete(donor);
   }
   state.selected[index] = tile.id;
   state.assisted.add(index);
+  state.wrongSlots.delete(index);
   feedback(`补上「${char}」，本句伤害 −2，剩余 ${potentialDamage()} 点。`);
   renderPuzzle();
 }
@@ -169,9 +177,12 @@ function attack() {
   if (state.selected.includes(null)) { feedback('先把空位填满，再以诗出招。', 'error'); return; }
   const answer = state.selected.map(id => state.tiles[id].char).join('');
   if (answer !== state.question.answer) {
-    feedback('字序还不对，点已选的字撤回，或用帮助补正一字。', 'error');
+    state.wrongSlots = new Set([...state.question.answer].flatMap((char,index) => selectedCharacter(index) !== char ? [index] : []));
+    renderPuzzle();
+    feedback('红色字块有误，点它撤回重选，或用帮助补正一字。', 'error');
     return;
   }
+  state.wrongSlots.clear();
   const damage = potentialDamage();
   state.enemyHp = Math.max(0, state.enemyHp - damage);
   state.score += damage;
