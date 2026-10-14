@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=9b14b09f5b68" />
+  <link rel="stylesheet" href="modes.css?v=dfd94d833b5c" />
 </head>
 <body>
   <header class="topbar">
@@ -24,7 +24,7 @@
       <p class="entry-note">不必字字珠玑，只愿句句有诗意</p></div>
     </section>
     <section class="mode-selection" id="modeSelection" hidden aria-labelledby="modeTitle">
-      <button class="text-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
+      <button class="text-button return-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
 
       <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2><span>点击类别，开始选字拼诗</span></div><div class="category-grid" id="categoryGrid"></div><p class="mode-note">每字 2 点伤害 · 帮助补一字，少 2 点伤害</p></section>
       <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战 · 示例篇</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><p>按春、夏、秋、冬依次闯关<br><small>怪物会反击，降服后恢复元气</small></p><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
@@ -36,7 +36,7 @@
       </aside>
 
       <section class="battle paper">
-        <div class="battle-top"><div class="battle-route"><span id="volumeLabel"></span><span class="chapter" id="chapter"></span></div><div class="battle-tools"><button id="modeButton" class="text-button">← 返回入口</button><button id="resetButton" class="text-button">↻ 重来</button></div></div>
+        <div class="battle-top"><div class="battle-route"><span id="volumeLabel"></span><span class="chapter" id="chapter"></span></div><div class="battle-tools"><button id="modeButton" class="text-button return-button">← 返回入口</button><button id="resetButton" class="text-button">↻ 重来</button></div></div>
         <div class="stage-progress" id="stageProgress" aria-label="关卡进度"></div>
         <div class="enemy-heading"><h2 id="enemyName">墨墨小妖 <span>壹</span></h2><p id="enemyDescription">偷吃诗书的小妖，最怕朗朗读书声。</p></div>
         <div class="enemy-health"><span id="enemyHealthLabel">妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">24 / 24</b></div>
@@ -63,7 +63,7 @@
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
   <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>根据诗名和相邻一句，从打乱的文字块中按顺序拼出缺少的诗句，再点击「以诗出招」。</p><ul><li>学习模式可选诗经、楚辞、汉赋、唐诗、宋词、元曲，不扣元气，可反复练习。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>挑战中拼对后，存活的小妖反击 4 点元气，包括 0 伤害的出招。降服后恢复 20 点元气。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式，重新进入会开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
-  <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
+  <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <script src="poems.js?v=2621e5f9f3dd"></script>
   <script src="curriculum.js?v=4fd71429c86d"></script>
   <script src="game.js?v=9969eed617cc"></script>
