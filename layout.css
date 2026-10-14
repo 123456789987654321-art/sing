@@ -14,8 +14,9 @@ main { padding: 14px 0; }
 .monster { top: auto; bottom: 16px; scale: 1.05; transform-origin: 0 100%; }
 .monster-shadow, .ground-line { bottom: 16px; }
 .mountain { bottom: 0; }
-.speech { top: auto; bottom: 82px; left: 10px; transform: none; max-width: calc(50% - 95px); white-space: normal; line-height: 1.6; padding: 8px 10px; }
-.speech:after { top: 50%; bottom: auto; left: auto; right: -5px; transform: translateY(-50%) rotate(-45deg); }
+.speech { top: 12px; bottom: auto; left: 12px; transform: none; width: 190px; max-width: calc(50% - 95px); white-space: normal; font-size: 12px; line-height: 1.6; padding: 20px 16px; text-align: center; border: 1.5px solid #77775d; border-radius: 50%; background: #fffdf5; color: #66654e; }
+.speech:before { content: ''; position: absolute; right: 20%; bottom: -16px; width: 22px; height: 28px; background: #77775d; clip-path: polygon(0 0, 100% 100%, 65% 0); }
+.speech:after { top: auto; bottom: -12px; left: auto; right: calc(20% + 2px); width: 18px; height: 25px; border: 0; border-radius: 0; background: #fffdf5; transform: none; clip-path: polygon(0 0, 100% 100%, 65% 0); }
 .player-stats { grid-template-columns: 1fr; text-align: center; }
 .scene-caption { display: none; }
 .writing-area { margin: 6px 20px 12px; }
@@ -78,7 +79,7 @@ details[open] > summary .panel-arrow { transform: rotate(180deg); }
   .monster { scale: 1.3; bottom: 18px; }
   .monster-shadow { width: 175px; bottom: 18px; }
   .ground-line { bottom: 18px; }
-  .speech { top: auto; bottom: 105px; max-width: calc(50% - 115px); font-size: 12px; }
+  .speech { top: 18px; width: 210px; max-width: calc(50% - 115px); font-size: 14px; }
   .battle-top { padding-top: 20px; }
   .stage-progress { margin: 16px 0; }
   .enemy-heading h2 { font-size: 28px; }
@@ -118,7 +119,7 @@ details[open] > summary .panel-arrow { transform: rotate(180deg); }
   .scene { min-height: 190px; flex-basis: 190px; }
   .monster { scale: .8; bottom: 17px; }
   .monster-shadow, .ground-line { bottom: 17px; }
-  .speech { top: auto; bottom: 65px; max-width: calc(50% - 75px); font-size: 10px; padding: 7px 8px; }
+  .speech { top: 8px; left: 8px; max-width: calc(50% - 75px); font-size: 10px; padding: 14px 10px; }
   .scene-sun { top: 20px; }
   .writing-area { margin: 6px 14px 8px; }
   .writing-heading { margin-bottom: 6px; }
@@ -153,7 +154,7 @@ details[open] > summary .panel-arrow { transform: rotate(180deg); }
   .game-layout { grid-template-rows: auto minmax(375px, 1fr) auto; }
   .scene { min-height: 110px; flex-basis: 110px; }
   .monster { scale: .65; bottom: 12px; }
-  .speech { bottom: 50px; max-width: calc(50% - 65px); font-size: 9px; }
+  .speech { max-width: calc(50% - 65px); font-size: 9px; padding: 12px 8px; }
   .enemy-heading p { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
