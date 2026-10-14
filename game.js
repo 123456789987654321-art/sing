@@ -1,5 +1,12 @@
 const $ = id => document.getElementById(id);
-const normalize = text => text.replace(/[^\u3400-\u9fff]/g, '');
+const isHan = char => /\p{Script=Han}/u.test(char);
+const normalize = text => [...text].filter(isHan).join('');
+const LEARNING_WORKS = POEMS.filter(poem => !poem[2].includes('节选')).map(poem => ({
+  category:poem[0], author:poem[1], title:poem[2], text:poem[3],
+  sentences:(poem[3].match(/[^。！？!?]+[。！？!?]?/gu) || []).map(text => text.trim()).filter(text => normalize(text))
+}));
+function learningWorks() { return LEARNING_WORKS.filter(work => work.category === state.category); }
+function learningWork() { return learningWorks()[state.workIndex]; }
 const QUESTIONS = POEMS.flatMap(poem => {
   const lines = poem[3].split(/[，。！？；、]/).map(normalize).filter(Boolean);
   return lines.flatMap((answer, index) => {
@@ -42,11 +49,18 @@ function prepareDeck() {
 }
 
 function newPuzzle() {
-  if (!state.deck.length) state.deck = shuffled(questionPool());
-  state.question = state.deck.shift();
+  if (state.mode === 'learning') {
+    const work = learningWork();
+    const sentence = work.sentences[state.sentenceIndex];
+    state.question = {answer:normalize(sentence), sentence, source:`${work.author} · ${work.title}`,
+      title:work.title, category:work.category, clue:`第 ${state.workIndex + 1} / ${learningWorks().length} 篇 · 第 ${state.sentenceIndex + 1} / ${work.sentences.length} 句`};
+  } else {
+    if (!state.deck.length) state.deck = shuffled(questionPool());
+    state.question = state.deck.shift();
+  }
   const answer = [...state.question.answer];
   // Each occurrence of a repeated character needs its own tile.
-  const extras = shuffled(DISTRACTORS.filter(char => !answer.includes(char))).slice(0, 18 - answer.length);
+  const extras = shuffled(DISTRACTORS.filter(char => !answer.includes(char))).slice(0, Math.max(4, 18 - answer.length));
   state.tiles = shuffled([...answer, ...extras]).map((char, id) => ({id, char}));
   state.selected = Array(answer.length).fill(null);
   state.assisted = new Set();
@@ -86,9 +100,9 @@ function startGame(mode, category = '唐诗') {
 function resetGame() {
   clearTimeout(transitionTimer);
   state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
-    stage:0, hp:100, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
+    workIndex:0, sentenceIndex:0, completedWorks:0, poemComplete:false, stage:0, hp:100, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
-  prepareDeck();
+  if (state.mode === 'challenge') prepareDeck();
   newPuzzle();
   $('resultDialog').close();
   $('monster').classList.remove('hit');
@@ -103,8 +117,8 @@ function renderModeSelection() {
     const button = document.createElement('button');
     button.className = 'category-card';
     button.style.setProperty('--category-color', category.color);
-    const count = QUESTIONS.filter(question => question.category === category.name).length;
-    button.innerHTML = `<span class="category-mark">${category.mark}</span><strong>${category.name}</strong><span>${category.note}</span><small>${count} 句可练习 <b>↗</b></small>`;
+    const count = LEARNING_WORKS.filter(work => work.category === category.name).length;
+    button.innerHTML = `<span class="category-mark">${category.mark}</span><strong>${category.name}</strong><span>${category.note}</span><small>${count} 篇完整作品 <b>↗</b></small>`;
     button.addEventListener('click', () => startGame('learning', category.name));
     $('categoryGrid').append(button);
   });
@@ -121,9 +135,9 @@ function pendingHelpIndex() {
   return [...state.question.answer].findIndex((char, index) => selectedCharacter(index) !== char);
 }
 function potentialDamage() {
-  return (state.question.answer.length - state.assisted.size) * 2;
+  return ([...state.question.answer].length - state.assisted.size) * 2;
 }
-function controlsLocked() { return state.busy || state.over; }
+function controlsLocked() { return state.busy || state.over || state.poemComplete; }
 
 function render() {
   const stage = currentStage();
@@ -141,9 +155,40 @@ function render() {
   $('monster').style.setProperty('--monster', stage.color);
   $('stageProgress').hidden = learning;
   $('stageProgress').innerHTML = VOLUME.chapters.map((_,i) => `${i ? '<span class="stage-line"></span>' : ''}<span class="stage-node ${i === state.stage ? 'current' : i < state.stage ? 'completed' : ''}">${i < state.stage ? '✓' : i + 1}</span>`).join('');
-  $('comboText').textContent = state.solved ? `已成诗 ${state.solved} 句` : '点选文字，拼出第一句诗';
+  $('comboText').textContent = learning ? `已学完 ${state.completedWorks} 篇 · 已拼对 ${state.solved} 句` : state.solved ? `已成诗 ${state.solved} 句` : '点选文字，拼出第一句诗';
+  renderLearning();
   if (!state.busy) $('enemySpeech').textContent = stage.speech;
   renderPuzzle();
+}
+
+function renderLearning() {
+  const learning = state.mode === 'learning';
+  $('gameScreen').classList.toggle('learning-game', learning);
+  $('learningSummary').hidden = !learning || !state.poemComplete;
+  $('answerSlots').hidden = learning && state.poemComplete;
+  $('characterBank').hidden = learning && state.poemComplete;
+  $('tileActions').hidden = learning && state.poemComplete;
+  $('learnedVerses').hidden = !learning || !state.sentenceIndex || state.poemComplete;
+  if (!learning) return;
+  const work = learningWork();
+  $('learnedVerses').textContent = work.sentences.slice(0, state.sentenceIndex).join('\n');
+  if (state.poemComplete) {
+    $('completedPoemTitle').textContent = `《${work.title}》学完了`;
+    $('completedPoemText').textContent = work.sentences.join('\n');
+    $('nextPoem').textContent = state.workIndex + 1 < learningWorks().length ? '下一篇 →' : '本卷学完，返回入口';
+  }
+}
+
+function nextLearningWork() {
+  if (state.mode !== 'learning' || !state.poemComplete) return;
+  if (state.workIndex + 1 === learningWorks().length) { showModeSelection(); return; }
+  state.workIndex++;
+  state.sentenceIndex = 0;
+  state.poemComplete = false;
+  state.enemyHp = currentStage().hp;
+  newPuzzle();
+  feedback('');
+  render();
 }
 
 function renderPuzzle() {
@@ -153,6 +198,7 @@ function renderPuzzle() {
   $('hintCount').textContent = `${state.assisted.size} 次`;
   $('potentialDamage').textContent = `${potentialDamage()} 点`;
   $('answerSlots').style.setProperty('--slots', state.selected.length);
+  $('answerSlots').classList.toggle('sentence-answer', state.mode === 'learning');
   $('answerSlots').replaceChildren();
   state.selected.forEach((tileId, index) => {
     const button = document.createElement('button');
@@ -168,6 +214,25 @@ function renderPuzzle() {
     button.addEventListener('click', () => removeCharacter(index));
     $('answerSlots').append(button);
   });
+  if (state.mode === 'learning') {
+    const buttons = [...$('answerSlots').children];
+    $('answerSlots').replaceChildren();
+    let index = 0, segment = document.createElement('span');
+    segment.className = 'sentence-segment';
+    for (const char of state.question.sentence) {
+      if (isHan(char)) { segment.append(buttons[index++]); }
+      else if (char.trim()) {
+        const punctuation = document.createElement('span');
+        punctuation.className = 'sentence-punctuation';
+        punctuation.textContent = char;
+        segment.append(punctuation);
+        $('answerSlots').append(segment);
+        segment = document.createElement('span');
+        segment.className = 'sentence-segment';
+      }
+    }
+    if (segment.childNodes.length) $('answerSlots').append(segment);
+  }
   $('characterBank').replaceChildren();
   state.tiles.forEach(tile => {
     const button = document.createElement('button');
@@ -217,11 +282,11 @@ function useHint() {
   if (controlsLocked()) return;
   const index = pendingHelpIndex();
   if (index === -1) return;
-  const char = state.question.answer[index];
+  const char = [...state.question.answer][index];
   let tile = state.tiles.find(item => item.char === char && !state.selected.includes(item.id));
   if (!tile) {
     // A needed duplicate may have been placed in the wrong slot; move only a manual tile.
-    const donor = state.selected.findIndex((id,slot) => id !== null && !state.assisted.has(slot) && selectedCharacter(slot) === char && selectedCharacter(slot) !== state.question.answer[slot]);
+    const donor = state.selected.findIndex((id,slot) => id !== null && !state.assisted.has(slot) && selectedCharacter(slot) === char && selectedCharacter(slot) !== [...state.question.answer][slot]);
     if (donor === -1) return;
     tile = state.tiles[state.selected[donor]];
     state.selected[donor] = null;
@@ -264,6 +329,22 @@ function attack() {
   render();
   transitionTimer = setTimeout(() => {
     $('monster').classList.remove('hit');
+    if (state.mode === 'learning') {
+      if (state.enemyHp === 0) { state.defeated++; state.enemyHp = currentStage().hp; }
+      const work = learningWork();
+      state.busy = false;
+      if (state.sentenceIndex + 1 === work.sentences.length) {
+        state.poemComplete = true;
+        state.completedWorks++;
+        feedback(`《${work.title}》已完整学完，回顾后再进入下一篇。`, 'success');
+      } else {
+        state.sentenceIndex++;
+        newPuzzle();
+        feedback('这一句拼对了，继续同一篇的下一句。', 'success');
+      }
+      render();
+      return;
+    }
     if (state.enemyHp === 0) {
       state.defeated++;
       state.hp = Math.min(100, state.hp + 20);
@@ -309,6 +390,7 @@ function playTone(victory = false) {
   } catch { /* Sound is optional. */ }
 }
 
+$('nextPoem').addEventListener('click', nextLearningWork);
 $('attackButton').addEventListener('click', attack);
 $('clearButton').addEventListener('click', clearSelection);
 document.querySelectorAll('[data-hint]').forEach(button => button.addEventListener('click', useHint));
