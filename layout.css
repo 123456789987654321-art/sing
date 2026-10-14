@@ -87,7 +87,7 @@ details[open] > summary .panel-arrow { transform: rotate(180deg); }
 /* Small screens start with collapsed supporting panels below the battle. */
 @media (max-width: 1050px) {
   .topbar { height: 56px; margin: 0 16px; }
-  .brand { font-size: 21px; }
+  .brand { font-size: clamp(14px, 4.1vw, 21px); letter-spacing: 1px; gap: 9px; white-space: nowrap; }
   .brand-seal { width: 34px; height: 37px; font-size: 25px; }
   main { padding: 8px 0; }
   .game-layout {
