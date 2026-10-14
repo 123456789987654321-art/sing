@@ -7,6 +7,7 @@
   <title>诗出有名 · 以诗为剑</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="layout.css" />
+  <link rel="stylesheet" href="tiles.css" />
 </head>
 <body>
   <header class="topbar">
@@ -25,7 +26,7 @@
         <div class="battle-top"><span class="chapter" id="chapter">第一章 · 山林初逢</span><button id="resetButton" class="text-button">↻ 重新开始</button></div>
         <div class="stage-progress" id="stageProgress" aria-label="关卡进度"></div>
         <div class="enemy-heading"><h2 id="enemyName">墨墨小妖 <span>壹</span></h2><p id="enemyDescription">偷吃诗书的小妖，最怕朗朗读书声。</p></div>
-        <div class="enemy-health"><span>妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">120 / 120</b></div>
+        <div class="enemy-health"><span>妖气</span><div class="health-track"><div id="enemyHpBar"></div></div><b id="enemyHpText">24 / 24</b></div>
         <div class="scene" id="scene">
           <div class="scene-sun"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div><span class="scene-leaf leaf-one">❧</span><span class="scene-leaf leaf-two">❧</span><span class="scene-cloud">〜</span>
           <div class="speech" id="enemySpeech">哼，没点诗意可过不了我这关！</div>
@@ -33,19 +34,24 @@
           <div class="monster-shadow"></div><div id="damage" class="damage" aria-live="polite"></div><div class="ground-line"></div>
           <span class="scene-caption">山林有小妖，待君以诗降。</span>
         </div>
-        <div class="writing-area"><div class="writing-heading"><h3><span>✦</span> 落笔成招</h3><span>诗、词、曲，皆可入阵</span></div><form id="attackForm"><label class="sr-only" for="poemInput">输入古诗词句</label><textarea id="poemInput" maxlength="200" rows="2" placeholder="在这里写下一句你记得的古诗词…&#10;例如：飞流直下三千尺"></textarea><div class="input-bottom"><button class="attack-button" id="attackButton" type="submit">以诗出招 <span>↗</span></button></div></form><div class="feedback" id="feedback" role="status"></div></div>
-        <div class="battle-footer"><span><i class="status-dot"></i> 随心落笔，不限时间</span><span id="comboText">让第一句诗，开启你的江湖</span></div>
+        <div class="writing-area tile-arena">
+          <div class="puzzle-heading"><h3><span>✦</span> 选字成诗</h3><span id="poemSource"></span></div>
+          <p class="verse-clue" id="verseClue"></p>
+          <div class="answer-slots" id="answerSlots" role="group" aria-label="已选择的诗句文字，点击可撤回"></div>
+          <div class="character-bank" id="characterBank" role="group" aria-label="待选文字块"></div>
+          <div class="tile-actions"><div class="edit-actions"><button id="clearButton" class="text-button" type="button">↶ 重选</button><button class="hint-action" data-hint type="button">✧ 帮助 <small>−2 伤害</small></button></div><button class="attack-button" id="attackButton" type="button">以诗出招 <span>↗</span></button></div>
+          <div class="feedback" id="feedback" role="status"></div>
+        </div>
+        <div class="battle-footer"><span><i class="status-dot"></i> 每个自行选出的字 · 2 点伤害</span><span id="comboText">让第一句诗，开启你的江湖</span></div>
       </section>
 
-      <aside class="right-column"><details class="paper inspiration" id="inspirationPanel" open><summary class="section-label">诗意锦囊 <span class="panel-arrow">⌄</span></summary><div class="inspiration-content"><p class="card-subtitle">一时想不起？借一缕诗意。</p><div class="tabs" role="tablist"><button class="active" data-category="唐诗" role="tab" aria-selected="true">唐诗</button><button data-category="宋词" role="tab" aria-selected="false">宋词</button><button data-category="元曲" role="tab" aria-selected="false">元曲</button></div><div id="suggestions" class="suggestions"></div><p class="suggestion-note">点击诗句，落入笔下 ↙</p></div></details>
-      <section class="paper tip-card"><span class="tip-icon">☾</span><div><h3>本关诗意 · 月</h3><p id="weaknessTip">诗句中含「月」字<br>可获得 <b>额外 20 点</b>伤害</p></div></section>
-      </aside>
+      <aside class="right-column"><section class="paper assistance-card"><div class="section-label">帮助 <span>借一字诗意</span></div><div class="help-emblem">✧</div><h3>想不起，就补一字</h3><p>每次帮助补上一个正确文字块。<br>补出的字不计入攻击伤害。</p><button class="primary-button" data-hint type="button">帮助 · 补一个字</button><div class="assist-tally"><span>本句已帮助</span><b id="hintCount">0 次</b></div><div class="assist-tally"><span>本句最高伤害</span><b id="potentialDamage">10 点</b></div><p class="assist-example">「床前明月光」共 5 字<br>不使用帮助：10 点伤害<br>帮助 1 次：8 点伤害</p></section><section class="paper tile-guide"><div class="section-label">选字小记 <span>✎</span></div><p>按顺序点击文字块，拼成题目中的诗句。</p><p>点已选的字可以撤回；带「助」的字已固定，不会恢复伤害。</p></section></aside>
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>以诗为剑，落笔成招</h2><p>输入锦囊中或内置诗库里的古诗词句，按 Enter 或点击「以诗出招」攻击小妖。标点和空格不影响识别。</p><ul><li>每个汉字造成 6 点伤害，完整两句额外加 15 点。</li><li>命中本关主题字，额外造成 20 点伤害。</li><li>连续命中有连击加成；同一关不能重复使用同一句。</li><li>每次有效攻击后，存活的小妖会反击 8 点元气。</li><li>击败小妖恢复 25 点元气，闯过五关即获胜。</li></ul><p class="dialog-note">离线诗库识别：暂未收录的诗句不会造成伤害，也不会扣除元气。可以点击锦囊中的诗句试试。</p><button class="primary-button dialog-close-action">提笔入江湖</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>根据诗名和相邻一句，从打乱的文字块中按顺序拼出缺少的诗句，再点击「以诗出招」。</p><ul><li>每个自行选出的字造成 2 点伤害，没有其他伤害加成。</li><li>每次「帮助」补正一个字，固定该位置，并扣除这个字的 2 点伤害。</li><li>例如「床前明月光」为 10 点伤害，帮助 1 次后为 8 点；全部帮助则为 0 点。</li><li>点已选的字可撤回；「重选」只清除自己选的字，帮助扣除的伤害不会恢复。</li><li>拼错可以重试，不扣元气。拼对后存活的小妖反击 4 点元气，包括 0 伤害的出招。</li><li>击败小妖恢复 20 点元气，闯过五关即获胜。</li></ul><button class="primary-button dialog-close-action">开始选字</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button></dialog>
+  <script src="poems.js"></script>
   <script src="game.js"></script>
-  <script src="layout.js"></script>
 </body>
 </html>

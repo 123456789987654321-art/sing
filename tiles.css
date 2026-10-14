@@ -1,0 +1,112 @@
+/* Character tiles replace the typing field and the inspiration library. */
+.tile-arena { margin: 8px 20px 10px; }
+.puzzle-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.puzzle-heading h3 { margin: 0; font: 600 16px var(--serif); white-space: nowrap; }
+.puzzle-heading h3 span { color: var(--green); margin-right: 5px; }
+#poemSource { font-size: 10px; color: var(--muted); text-align: right; overflow-wrap: anywhere; }
+.verse-clue { font: 12px/1.5 var(--serif); color: #81785e; margin: 6px 0 8px; }
+.answer-slots { --slots: 5; display: grid; grid-template-columns: repeat(var(--slots), minmax(0, 1fr)); gap: 6px; max-width: 400px; margin: 0 auto 10px; }
+.answer-slot { position: relative; height: 40px; min-width: 0; border: 1px dashed #cbc5ae; border-radius: 8px; background: #f4f0e2; color: #b8ae95; font: 600 22px var(--serif); }
+.answer-slot.filled { background: #edf0de; border: 1px solid #a5af87; color: #61734b; box-shadow: 0 2px 0 #c4cbb1; }
+.answer-slot.assisted { background: #f5e9cf; border-color: #c4a57c; color: #99734a; }
+.answer-slot.assisted::after { content: '助'; position: absolute; right: 2px; top: 0; font: 8px/1.2 system-ui; color: #a27b4e; }
+.answer-slot:disabled { cursor: default; }
+.character-bank { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.character-tile { min-width: 0; height: 42px; border: 1px solid #c6bfac; border-radius: 9px; background: #fffdf5; color: #786182; box-shadow: inset 0 2px 0 #fff, 0 3px 0 #c5bfad; font: 600 23px var(--serif); }
+.character-tile:hover:not(:disabled) { border-color: #8e9d6e; background: #f2f3e3; }
+.character-tile:disabled { cursor: default; transform: none; }
+.character-tile.used { color: #c9c3b3; background: #ede9dc; box-shadow: inset 0 1px 3px #c9c3af50; border-color: #dfd8c6; }
+.tile-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; }
+.edit-actions { display: flex; gap: 8px; align-items: center; }
+.hint-action { padding: 8px 10px; border: 1px solid #c9b991; border-radius: 7px; background: #f5ecd6; color: #8d7348; font-size: 12px; }
+.hint-action small { font-size: 9px; margin-left: 5px; }
+.attack-button:disabled, [data-hint]:disabled, #clearButton:disabled { opacity: .45; cursor: default; transform: none; }
+.assistance-card { padding: 22px 20px; }
+.help-emblem { width: 65px; height: 65px; margin: 24px auto 16px; border: 1px solid #d8c69c; background: #f4ebd5; border-radius: 50%; font: 40px/65px var(--serif); text-align: center; color: #ac925c; }
+.assistance-card h3 { text-align: center; font: 600 17px var(--serif); margin: 0 0 12px; }
+.assistance-card p { font-size: 11px; color: var(--muted); line-height: 1.9; text-align: center; }
+.assistance-card .primary-button { width: 100%; margin: 10px 0 22px; padding-left: 6px; padding-right: 6px; }
+.assist-tally { display: flex; justify-content: space-between; font-size: 12px; color: #968b73; margin: 12px 0; }
+.assist-tally b { color: #7c8761; font-weight: 500; }
+.assistance-card .assist-example { border-top: 1px dashed #ddd5bf; margin: 18px 0 0; padding-top: 14px; text-align: left; font-size: 10px; }
+.tile-guide { padding: 18px; }
+.tile-guide p { font-size: 11px; line-height: 1.8; color: var(--muted); margin: 12px 0 0; }
+.battle .scene { height: 155px; min-height: 155px; flex: 0 0 auto; }
+.battle .monster { scale: .8; bottom: 10px; }
+.battle .monster-shadow, .battle .ground-line { bottom: 10px; }
+.battle .speech { top: 20px; font-size: 10px; padding: 12px; width: 160px; max-width: calc(50% - 80px); }
+.battle .scene-sun { width: 58px; height: 58px; top: 18px; }
+.battle .enemy-heading p { display: none; }
+.battle .stage-progress { margin: 7px 0; }
+.battle .battle-top { padding-top: 10px; }
+.battle .enemy-heading h2 { font-size: 22px; margin-bottom: 4px; }
+.battle .enemy-health { margin-top: 8px; }
+.battle .battle-footer { padding: 8px 20px; }
+.tile-arena .feedback { font-size: 10px; line-height: 1.5; }
+
+@media (min-width: 1051px) {
+  .topbar { height: 56px; }
+  main { padding: 10px 0; }
+  .game-layout { grid-template-columns: minmax(190px, .85fr) minmax(420px, 2.5fr) minmax(225px, 1fr); }
+  .left-column, .right-column { align-self: start; }
+  .tile-arena .hint-action { display: none; }
+  .daily-card { min-height: 245px; }
+}
+@media (min-width: 1051px) and (min-height: 900px) {
+  .battle .scene { height: 200px; min-height: 200px; }
+  .battle .monster { scale: 1.05; }
+  .battle .speech { top: 26px; font-size: 12px; }
+  .character-tile { height: 50px; font-size: 26px; }
+  .answer-slot { height: 44px; }
+  .character-bank { gap: 8px; }
+}
+@media (max-width: 1050px) {
+  .right-column { display: none; }
+  .game-layout { grid-template-rows: auto auto; }
+  .tile-arena { margin: 6px 14px 9px; }
+  .puzzle-heading h3 { font-size: 14px; }
+  #poemSource { font-size: 9px; }
+  .verse-clue { font-size: 11px; margin: 4px 0 6px; }
+  .answer-slots { gap: 5px; margin-bottom: 8px; }
+  .answer-slot { height: 34px; font-size: 20px; }
+  .character-tile { height: 38px; font-size: 22px; }
+  .character-bank { gap: 6px; }
+  .tile-actions { margin-top: 10px; }
+  .edit-actions { gap: 4px; }
+  .hint-action { font-size: 11px; padding: 7px 8px; }
+  .hint-action small { font-size: 8px; margin-left: 2px; }
+  .battle .scene { height: 135px; min-height: 135px; }
+  .battle .monster { scale: .7; }
+  .battle .speech { top: 17px; max-width: calc(50% - 68px); padding: 10px 8px; font-size: 9px; }
+  .battle .battle-footer { padding: 7px 14px; }
+}
+@media (max-height: 740px) {
+  .battle .stage-progress { display: none; }
+  .battle .enemy-heading { margin-top: 5px; }
+  .battle .scene { height: 105px; min-height: 105px; }
+  .battle .monster { scale: .57; bottom: 8px; }
+  .battle .monster-shadow, .battle .ground-line { bottom: 8px; }
+  .battle .speech { top: 12px; width: 145px; max-width: calc(50% - 65px); padding: 8px; font-size: 9px; }
+  .battle .scene-leaf { font-size: 55px; }
+  .answer-slot { height: 32px; font-size: 20px; }
+  .character-tile { height: 34px; font-size: 21px; }
+  .character-bank { gap: 5px; }
+  .tile-actions { margin-top: 9px; }
+  .tile-arena .attack-button { padding: 8px 14px; font-size: 12px; }
+  .tile-guide { display: none; }
+  .assistance-card { padding: 16px; }
+  .help-emblem { margin: 12px auto; width: 50px; height: 50px; font-size: 32px; line-height: 50px; }
+  .assistance-card .primary-button { margin-bottom: 12px; }
+}
+@media (max-width: 360px) {
+  .tile-arena { margin-left: 10px; margin-right: 10px; }
+  .hint-action small { display: none; }
+  .puzzle-heading { gap: 5px; }
+}
+@media (min-width: 1051px) and (max-height: 600px) {
+  .topbar { height: 48px; }
+  main { padding: 6px 0; }
+  .tile-arena { margin-top: 4px; margin-bottom: 6px; }
+  .tile-actions { margin-top: 8px; }
+  .character-tile { height: 32px; }
+}
