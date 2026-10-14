@@ -183,3 +183,7 @@
   .reading-text { max-height: 240px; margin-top: 12px; font-size: 14px; }
   .right-column .tile-guide { display: none; }
 }
+
+/* Keep each confirmed sentence on one visual line, including its punctuation. */
+.reading-text, .learning-summary #completedPoemText { container-type: inline-size; min-width: 0; max-width: 100%; white-space: normal; overflow: auto; overflow-wrap: normal; }
+.reading-line { display: block; white-space: nowrap; overflow-wrap: normal; word-break: keep-all; font-size: 16px; font-size: clamp(11px, calc(100cqw / var(--line-chars)), 16px); line-height: 2.2; }

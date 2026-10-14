@@ -263,7 +263,7 @@ function renderLearning() {
   const work = learningWork();
   if (state.poemComplete) {
     $('completedPoemTitle').textContent = `《${work.title}》学完了`;
-    $('completedPoemText').textContent = work.sentences.join('\n');
+    renderPoemLines($('completedPoemText'), work.sentences);
     $('nextPoem').textContent = state.workIndex + 1 < learningWorks().length ? '下一篇 →' : '本卷学完，返回入口';
   }
 }
@@ -281,13 +281,26 @@ function nextLearningWork() {
   render();
 }
 
+function renderPoemLines(container, sentences) {
+  container.replaceChildren();
+  sentences.forEach((sentence, index) => {
+    if (index) container.append(document.createTextNode('\n'));
+    const line = document.createElement('span');
+    line.className = 'reading-line';
+    line.style.setProperty('--line-chars', [...sentence].length);
+    line.textContent = sentence;
+    container.append(line);
+  });
+}
+
 function renderReading() {
   const work = state.mode === 'learning' ? learningWork() : state.question;
   $('readingTitle').textContent = `《${work.title}》`;
   $('readingAuthor').textContent = work.author;
-  $('readingText').textContent = state.mode === 'learning'
-    ? work.sentences.slice(0, state.confirmedSentences).join('\n')
-    : (state.readPoems[state.question.title] || []).join('\n');
+  const sentences = state.mode === 'learning'
+    ? work.sentences.slice(0, state.confirmedSentences)
+    : (state.readPoems[state.question.title] || []);
+  renderPoemLines($('readingText'), sentences);
   $('readingText').scrollTop = $('readingText').scrollHeight;
 }
 
