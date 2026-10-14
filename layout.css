@@ -1,11 +1,11 @@
 /* Keep feedback for actual attacks and errors; no idle instructional row. */
 .feedback:empty { min-height: 0; padding: 0; }
 .writing-area { margin-bottom: 16px; }
+.game-layout { margin-top: 24px; }
 
 /* Desktop uses the available canvas while retaining the mobile layout. */
 @media (min-width: 1051px) {
   .topbar { width: 94%; max-width: 1720px; height: 80px; margin: auto; }
-  .intro { padding: 23px 0 24px; }
   .game-layout {
     width: 94%;
     max-width: 1720px;
