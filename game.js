@@ -126,6 +126,9 @@ function questionPool() {
 }
 
 function prepareDeck() {
+  state.chapterStart = {score:state.score, solved:state.solved, defeated:state.defeated};
+  state.usedVerses = [];
+  state.lastChallenge = null;
   const pool = questionPool();
   const opening = pool.find(question => question.answer === (state.mode === 'challenge'
     ? currentStage().opening : state.category === '唐诗' ? '床前明月光' : pool[0]?.answer));
@@ -142,6 +145,7 @@ function newPuzzle() {
     if (!state.deck.length) state.deck = shuffled(questionPool());
     state.question = state.deck.shift();
   }
+  if (state.mode === 'challenge') $('challengeForm').reset();
   const answer = [...state.question.answer];
   // Each occurrence of a repeated character needs its own tile.
   const extras = shuffled(DISTRACTORS.filter(char => !answer.includes(char))).slice(0, Math.max(4, 18 - answer.length));
@@ -178,7 +182,8 @@ function startGame(mode, category = '唐诗') {
   $('gameScreen').hidden = false;
   resetGame();
   if (mode === 'learning') restoreLearningProgress();
-  $('modeButton').focus({preventScroll:true});
+  $('gameScreen').setAttribute('tabindex', '-1');
+  $('gameScreen').focus({preventScroll:true});
   window.scrollTo(0, 0);
 }
 
@@ -249,7 +254,7 @@ function render() {
   $('comboText').textContent = learning ? `已学完 ${state.completedWorks} 篇 · 已拼对 ${state.solved} 句` : state.solved ? `已成诗 ${state.solved} 句` : '点选文字，拼出第一句诗';
   renderLearning();
   renderReading();
-  if (!state.busy) $('enemySpeech').textContent = stage.speech;
+  if (!state.busy) $('enemySpeech').textContent = learning ? stage.speech : '请写一句关于' + stage.season + '的诗，别忘了诗名和作者！';
   renderPuzzle();
 }
 
@@ -295,6 +300,12 @@ function renderPoemLines(container, sentences) {
 }
 
 function renderReading() {
+  if (state.mode === 'challenge') {
+    $('readingTitle').textContent = state.lastChallenge ? `《${state.lastChallenge.title}》` : '已答对的诗句';
+    $('readingAuthor').textContent = state.lastChallenge?.author || '';
+    renderPoemLines($('readingText'), state.lastChallenge ? [state.lastChallenge.sentence] : []);
+    return;
+  }
   const work = state.mode === 'learning' ? learningWork() : state.question;
   $('readingTitle').textContent = `《${work.title}》`;
   $('readingAuthor').textContent = work.author;
@@ -307,6 +318,23 @@ function renderReading() {
 
 function renderPuzzle() {
   const locked = controlsLocked();
+  const challenge = state.mode === 'challenge';
+  $('challengeForm').hidden = !challenge;
+  $('answerSlots').hidden = challenge || state.poemComplete;
+  $('characterBank').hidden = challenge || state.poemComplete;
+  $('tileActions').hidden = challenge || state.poemComplete;
+  document.querySelector('.help-tooltip-wrap').hidden = challenge;
+  document.querySelector('.puzzle-stats').hidden = challenge;
+  document.querySelector('.puzzle-heading h3').textContent = challenge ? '✦ 提笔应题' : '✦ 选字成诗';
+  document.querySelector('.tile-guide').hidden = challenge;
+  $('gameScreen').classList.toggle('challenge-game', challenge);
+  document.querySelector('.battle-footer > span').textContent = challenge ? '答错扣一颗心 · 耗尽后本章重来' : '每个自行选出的字 · 2 点伤害';
+  if (challenge) {
+    $('verseClue').textContent = `请写出关于「${currentStage().season}」的完整一句诗，并填写诗名和作者。`;
+    $('comboText').textContent = `已答对 ${state.solved} 句 · 每个字造成 2 点伤害`;
+    [...$('challengeForm').elements].forEach(element => element.disabled = locked);
+    return;
+  }
   $('poemSource').textContent = state.question.source;
   $('verseClue').textContent = state.question.clue;
   $('hintCount').textContent = `${state.assisted.size} 次`;
@@ -418,6 +446,7 @@ function feedback(message, type = '') {
 }
 
 function attack() {
+  if (state.mode === 'challenge') { attackChallenge(); return; }
   if (controlsLocked()) return;
   if (state.selected.includes(null)) { feedback('先把空位填满，再以诗出招。', 'error'); return; }
   const answer = state.selected.map(id => state.tiles[id].char).join('');
@@ -489,6 +518,80 @@ function attack() {
     render();
   }, 850);
 }
+
+
+// Ignore punctuation and spacing, but never discard incorrect letters or digits.
+const cleanSubmission = text => text.trim().replace(/[\s\p{P}]/gu, '');
+function matchChallenge(verse, title, author, stage = currentStage()) {
+  const text = cleanSubmission(verse);
+  return LEARNING_WORKS.find(work => stage.titles.includes(work.title)
+    && cleanSubmission(work.title) === cleanSubmission(title)
+    && cleanSubmission(work.author) === cleanSubmission(author)
+    && work.sentences.some(sentence => {
+      const canonical = cleanSubmission(sentence);
+      return canonical === text || (work.title === '山行'
+        && canonical.replace('白云生处', '白云深处') === text);
+    }));
+}
+function restartChapter() {
+  clearTimeout(transitionTimer);
+  Object.assign(state, state.chapterStart, {hp:6, enemyHp:currentStage().hp, busy:false, over:false});
+  prepareDeck();
+  newPuzzle();
+  render();
+  feedback('爱心已耗尽，本章从头开始，已恢复 6 颗爱心。', 'error');
+}
+function attackChallenge() {
+  if (controlsLocked()) return;
+  const verse = $('challengeVerse').value;
+  const title = $('challengeTitle').value;
+  const author = $('challengeAuthor').value;
+  if (![verse,title,author].every(value => value.trim())) {
+    feedback('请先填写完整诗句、诗名和作者。', 'error'); return;
+  }
+  const work = matchChallenge(verse, title, author);
+  const sentence = work?.sentences.find(line => cleanSubmission(line) === cleanSubmission(verse)
+    || (work.title === '山行' && cleanSubmission(line).replace('白云生处', '白云深处') === cleanSubmission(verse)));
+  const key = work && `${work.title}:${normalize(sentence)}`;
+  if (work && state.usedVerses.includes(key)) {
+    feedback('这句本章已经答过，请换一句。', 'error'); return;
+  }
+  if (!work) {
+    state.hp--;
+    render();
+    feedback('诗句不符合本章主题，或诗句、诗名、作者有误，扣 1 颗爱心。', 'error');
+    if (!state.hp) {
+      state.busy = true;
+      render();
+      transitionTimer = setTimeout(restartChapter, 1000);
+    }
+    return;
+  }
+  state.usedVerses.push(key);
+  state.lastChallenge = {title:work.title, author:work.author, sentence};
+  const damage = normalize(sentence).length * 2;
+  state.enemyHp = Math.max(0, state.enemyHp - damage);
+  state.score += damage;
+  state.solved++;
+  state.busy = true;
+  feedback(`答对了！造成 ${damage} 点伤害。`, 'success');
+  playTone(state.enemyHp === 0);
+  render();
+  transitionTimer = setTimeout(() => {
+    if (!state.enemyHp) {
+      state.defeated++;
+      if (state.stage === VOLUME.chapters.length - 1) { finish(true); return; }
+      state.stage++;
+      state.enemyHp = currentStage().hp;
+      prepareDeck();
+      feedback(`进入${currentStage().chapter}，请按新的主题作答。`, 'success');
+    }
+    state.busy = false;
+    newPuzzle();
+    render();
+  }, 850);
+}
+$('challengeForm').addEventListener('submit', event => { event.preventDefault(); attackChallenge(); });
 
 function finish(won) {
   state.over = true;

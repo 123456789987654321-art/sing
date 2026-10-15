@@ -197,3 +197,19 @@
   .help-tooltip { left: auto; right: 0; top: calc(100% + 10px); transform: none; }
   .help-tooltip::before { left: auto; right: 24px; top: -6px; transform: rotate(135deg); }
 }
+
+/* Free writing in seasonal challenges. */
+.challenge-form { display: grid; gap: 10px; color: #79785d; }
+.challenge-form label { display: grid; gap: 7px; font-size: 14px; }
+.challenge-form textarea, .challenge-form input { box-sizing: border-box; width: 100%; min-width: 0; padding: 12px; border: 1px solid #c5bca4; border-radius: 8px; background: #fffdf5; color: #514f40; font: 16px/1.6 var(--serif); }
+.challenge-form textarea { resize: vertical; }
+.challenge-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.challenge-form p { font-size: 12px; line-height: 1.8; margin: 0; }
+.challenge-form .attack-button { justify-self: end; }
+#gameScreen:focus { outline: none; }
+@media (max-width: 600px) {
+  .battle-top { flex-wrap: wrap; }
+  .learning-game .battle-tools { max-width: none; gap: 6px; }
+  .battle-tools .return-button { min-height: 36px; }
+  .return-button:focus:not(:focus-visible) { outline: none; }
+}

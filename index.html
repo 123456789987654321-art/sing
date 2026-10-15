@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=f3e59248b588" />
+  <link rel="stylesheet" href="modes.css?v=challenge-input-2" />
 </head>
 <body>
   <header class="topbar">
@@ -54,6 +54,12 @@
           <section class="learning-summary" id="learningSummary" hidden><h3 id="completedPoemTitle"></h3><p id="completedPoemText"></p><button class="primary-button" id="nextPoem" type="button">下一篇 →</button></section>
           <div class="answer-slots" id="answerSlots" role="group" aria-label="已选择的诗句文字，点击可撤回"></div>
           <div class="character-bank" id="characterBank" role="group" aria-label="待选文字块"></div>
+          <form id="challengeForm" class="challenge-form" hidden>
+<label for="challengeVerse">完整诗句</label><textarea id="challengeVerse" rows="3" placeholder="输入完整一句，包含逗号前后两部分" required maxlength="200" autocomplete="off"></textarea>
+<div class="challenge-details"><label>诗名<input id="challengeTitle" placeholder="不必填写书名号" required maxlength="60" autocomplete="off"></label><label>作者<input id="challengeAuthor" placeholder="填写作者姓名" required maxlength="40" autocomplete="off"></label></div>
+<p>按本章题库校验；标点、空格不影响判断。答错扣一颗心，爱心耗尽后本章重来。同一句不能重复出招。</p>
+<button class="attack-button" type="submit">以诗出招 ↗</button>
+</form>
           <div class="tile-actions" id="tileActions"><div class="edit-actions"><button id="clearButton" class="text-button" type="button">↶ 重选</button></div><button class="attack-button" id="attackButton" type="button">以诗出招 <span>↗</span></button></div>
           <div class="feedback" id="feedback" role="status"></div>
         </div>
@@ -64,10 +70,10 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式根据诗名和相邻一句拼出缺句。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。爱心耗尽则本轮结束。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式按季节主题输入完整诗句、诗名和作者，答错扣一颗心，耗尽后当前章重来。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。学习模式爱心耗尽则本轮结束；挑战模式恢复六颗心并从当前章开头重来。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <script src="poems.js?v=474766f88c54"></script>
   <script src="curriculum.js?v=4fd71429c86d"></script>
-  <script src="game.js?v=63e640bcdb19"></script>
+  <script src="game.js?v=challenge-input-2"></script>
 </body>
 </html>
