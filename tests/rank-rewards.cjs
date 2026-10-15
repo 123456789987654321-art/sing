@@ -38,9 +38,31 @@ const path = require('node:path');
     await send('Runtime.enable'); await send('Network.enable');
     await send('Network.setBlockedURLs', {urls:['*fonts.googleapis.com*', '*fonts.gstatic.com*']});
     await load(); await ev('localStorage.clear()'); await load();
+    await ev("startGame('learning', '唐诗')");
+    assert.equal(await ev('state.learningPreview'), true, 'Learning starts with the complete work to memorize');
+    assert.equal(await ev("$('previewText').textContent"), (await ev('learningWork().sentences')).join('\n'));
+    assert.equal(await ev("$('answerSlots').hidden"), true);
+    await ev('attack(); saveLearningProgress()');
+    assert.equal(await ev('state.solved'), 0, 'Preview cannot be submitted as an answer');
+    const previewTitle = await ev('learningWork().title');
+    await ev("startGame('learning', '唐诗')");
+    assert.equal(await ev('state.learningPreview'), true);
+    assert.equal(await ev('learningWork().title'), previewTitle, 'Preview saves preserve the selected poem');
+    for (const width of [1366, 320]) {
+      await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
+      assert(await ev('document.documentElement.scrollWidth <= innerWidth'));
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      fs.writeFileSync(`.browser-check/learning-preview-${width}.png`, Buffer.from(shot.data, 'base64'));
+    }
+    await ev("$('startLearningChallenge').click()");
+    assert.equal(await ev('state.learningPreview'), false);
+    assert.equal(await ev("$('readingText').textContent"), '');
+    await ev("saveLearningProgress(); startGame('learning', '唐诗')");
+    assert.equal(await ev('state.learningPreview'), false, 'Puzzle saves do not revert to preview');
     await ev(`window.originalTimeout = window.setTimeout;
       window.setTimeout = (fn, ms, ...args) => ms === 850 ? (fn(...args), 0) : originalTimeout(fn, ms, ...args);
       window.solve = () => {
+        if (state.learningPreview) $('startLearningChallenge').click();
         for (let i = 0; i < state.selected.length; i++) {
           const tile = state.tiles.find(t => t.char === [...state.question.answer][i] && !state.selected.includes(t.id));
           selectCharacter(tile.id);
@@ -98,7 +120,67 @@ const path = require('node:path');
     await load(); await ev("startGame('learning', '汉赋')");
     assert.equal(await ev("$('playerRank').textContent"), '略通诗中韵', 'Completed legacy saves recover their earned rank');
     assert.equal(await ev("$('rankRewardDialog').open"), false);
+    await ev('localStorage.clear()'); await load();
+    await ev(`window.originalTimeout = window.setTimeout;
+      window.setTimeout = (fn, ms, ...args) => ms === 850 ? (fn(...args), 0) : originalTimeout(fn, ms, ...args);
+      window.testSolve = () => {
+        for (const char of [...state.question.answer]) selectCharacter(state.tiles.find(t => t.char === char && !state.selected.includes(t.id)).id);
+        attack(); attack();
+      }; startGame('challenge');`);
+    assert.equal(await ev('document.querySelector(".help-tooltip-wrap").hidden'), false, 'Challenge has a help button');
+    await ev('useHint()');
+    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然');
+    await ev('useHint()');
+    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然\n春眠不觉晓');
+    await ev('useHint()');
+    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然\n春眠不觉晓\n处处闻啼鸟');
+    assert.equal(await ev('document.querySelector("[data-hint]").disabled'), true);
+    for (const width of [1366, 320]) {
+      await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
+      assert(await ev('document.documentElement.scrollWidth <= innerWidth'));
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      fs.writeFileSync(`.browser-check/challenge-help-${width}.png`, Buffer.from(shot.data, 'base64'));
+    }
+    await ev(`$('challengeVerse').value = '春眠不觉晓，处处闻啼鸟。';
+      $('challengeTitle').value = '春晓'; $('challengeAuthor').value = '孟浩然'; attackChallenge();`);
+    assert.equal(await ev("$('readingText').textContent"), '春眠不觉晓，处处闻啼鸟。《春晓》—孟浩然');
+    assert.equal(await ev("$('readingAuthor').hidden"), true);
+    assert.equal(await ev("$('challengeHint').hidden"), true, 'Help resets after correct answer');
+    await ev('useHint()');
+    assert.equal(await ev('state.challengeHintStep'), 1);
+    await ev('showModeSelection()');
+    assert.equal(await ev('document.querySelectorAll("[data-entry-mode=test]").length'), 1);
+    for (const width of [1366, 320]) {
+      await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
+      assert(await ev('document.documentElement.scrollWidth <= innerWidth'));
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      fs.writeFileSync(`.browser-check/test-entry-${width}.png`, Buffer.from(shot.data, 'base64'));
+    }
+    await ev('document.querySelector("[data-entry-mode=test]").click()');
+    assert.equal(await ev('state.mode'), 'test');
+    assert.equal(await ev('state.question.answer'), '床前明月光');
+    assert.equal(await ev('state.selected.length'), 5);
+    await ev(`for (const char of [...'光月明前床']) selectCharacter(state.tiles.find(t => t.char === char && !state.selected.includes(t.id)).id); attack();`);
+    assert.equal(await ev('playerRankIndex()'), 0, 'Wrong answers do not promote');
+    await ev('clearSelection(); testSolve()');
+    assert.equal(await ev('playerRankIndex()'), 1, 'One test answer promotes exactly once');
+    assert.equal(await ev("$('rankRewardDialog').open"), true);
+    assert.equal(await ev("$('rewardBook').textContent"), '床前明月光 · 测试通过');
+    assert.equal(await ev('completedBooks.size'), 0);
+    await ev("$('continueLearning').click(); attack()");
+    assert.equal(await ev('playerRankIndex()'), 1);
+    for (let rank = 2; rank <= 5; rank++) {
+      await ev('resetGame(); testSolve()');
+      assert.equal(await ev('playerRankIndex()'), rank);
+      assert.equal(await ev("$('rankRewardDialog').open"), true);
+      await ev("$('continueLearning').click()");
+    }
+    await ev('resetGame(); testSolve()');
+    assert.equal(await ev('playerRankIndex()'), 5);
+    assert.equal(await ev("$('rankRewardDialog').open"), false);
+    await load(); await ev('startGame("test")');
+    assert.equal(await ev('playerRankIndex()'), 5, 'Test rank survives reload');
     assert.deepEqual(errors, []);
-    console.log('PASS: whole books, six ranks, five promotion rewards, persistence, legacy saves, duplicates, cap, modal focus, responsive layout, reduced motion, no browser errors.');
+    console.log('PASS: book/test promotions, full-poem preview and saved phases, three-step challenge help, inline attribution, persistence, legacy saves, caps, modal focus, responsive layouts, reduced motion, no browser errors.');
   } finally { ws.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
