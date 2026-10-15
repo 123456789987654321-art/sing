@@ -494,11 +494,12 @@ function renderPuzzle() {
   document.querySelector('.puzzle-heading h3').textContent = challenge ? '✦ 提笔应题' : '✦ 选字成诗';
   document.querySelector('.tile-guide').hidden = challenge || preview;
   $('gameScreen').classList.toggle('challenge-game', challenge);
-  document.querySelector('.battle-footer > span').textContent = challenge ? '答错扣一颗心 · 耗尽后本章重来' : '每个自行选出的字 · 2 点伤害';
+  document.querySelector('.battle-footer').hidden = challenge;
+  document.querySelector('.battle-footer > span').textContent = challenge ? '' : '每个自行选出的字 · 2 点伤害';
   if (challenge) {
     document.querySelectorAll('[data-hint]').forEach(button => { button.disabled = locked || !state.challengeHint || state.challengeHintStep >= 3; });
     $('verseClue').textContent = `请写出关于「${currentStage().season}」的完整一句诗，并填写诗名和作者。`;
-    $('comboText').textContent = `已答对 ${state.challengeCorrect} / 40 句 · 已击败 ${state.challengeBossWins} / 4 位 Boss`;
+    $('comboText').textContent = '';
     if (state.challengeBoss) $('verseClue').textContent = `第 ${state.challengeBoss.checkpoint} 句已完成，先击败${state.challengeBoss.kind} Boss 再继续。`;
     else if (!state.over) $('verseClue').textContent += ` 再答对 ${10 - state.challengeCorrect % 10} 句迎战${CHALLENGE_BOSS_KINDS[state.challengeBossWins]} Boss。`;
     [...$('challengeForm').elements].forEach(element => element.disabled = locked);

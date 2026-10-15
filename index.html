@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=5a964fdb7834" />
+  <link rel="stylesheet" href="modes.css?v=4556efcd6483" />
   <link rel="stylesheet" href="boss.css?v=b4b07ae7fc5c" />
   <link rel="stylesheet" href="attack-fx.css?v=45cdeb5523a2" />
 </head>
@@ -65,9 +65,8 @@
           <div class="answer-slots" id="answerSlots" role="group" aria-label="已选择的诗句文字，点击可撤回"></div>
           <div class="character-bank" id="characterBank" role="group" aria-label="待选文字块"></div>
           <form id="challengeForm" class="challenge-form" hidden>
-<label for="challengeVerse">完整诗句</label><textarea id="challengeVerse" rows="3" placeholder="输入完整一句，包含逗号前后两部分" required maxlength="200" autocomplete="off"></textarea>
-<div class="challenge-details"><label>诗名<input id="challengeTitle" placeholder="不必填写书名号" required maxlength="60" autocomplete="off"></label><label>作者<input id="challengeAuthor" placeholder="填写作者姓名" required maxlength="40" autocomplete="off"></label></div>
-<p>按本章题库校验；标点、空格不影响判断。答错扣一颗心，爱心耗尽后本章重来。同一句不能重复出招。</p>
+<label for="challengeVerse">完整诗句</label><textarea id="challengeVerse" rows="3" required maxlength="200" autocomplete="off"></textarea>
+<div class="challenge-details"><label>诗名<input id="challengeTitle" required maxlength="60" autocomplete="off"></label><label>作者<input id="challengeAuthor" required maxlength="40" autocomplete="off"></label></div>
 <button class="attack-button" type="submit">以诗出招 ↗</button>
 </form>
           <div class="tile-actions" id="tileActions"><div class="edit-actions"><button id="clearButton" class="text-button" type="button">↶ 重选</button></div><button class="attack-button" id="attackButton" type="button">以诗出招 <span>↗</span></button></div>
@@ -124,8 +123,8 @@
       <div class="boss-player"><span>你的爱心</span><span id="challengeBossLives" class="boss-lives"></span></div>
       <div class="challenge-boss-help"><p id="challengeBossRule" class="boss-rule"></p><button id="challengeBossHintButton" class="puzzle-help" type="button">✧ 帮助 0/3</button></div>
       <form id="challengeBossForm" class="challenge-form">
-        <label for="challengeBossVerse">完整诗句</label><textarea id="challengeBossVerse" rows="2" placeholder="写出完整一句诗，包含各个分句" required maxlength="200" autocomplete="off"></textarea>
-        <div class="challenge-details"><label>诗名<input id="challengeBossTitleInput" placeholder="不必填写书名号" required maxlength="60" autocomplete="off"></label><label>作者<input id="challengeBossAuthor" placeholder="填写作者姓名" required maxlength="40" autocomplete="off"></label></div>
+        <label for="challengeBossVerse">完整诗句</label><textarea id="challengeBossVerse" rows="2" required maxlength="200" autocomplete="off"></textarea>
+        <div class="challenge-details"><label>诗名<input id="challengeBossTitleInput" required maxlength="60" autocomplete="off"></label><label>作者<input id="challengeBossAuthor" required maxlength="40" autocomplete="off"></label></div>
         <p id="challengeBossFeedback" class="boss-feedback" role="status"></p><button class="primary-button" type="submit">以诗破阵 →</button>
       </form>
     </section>
@@ -137,7 +136,7 @@
   <script src="challenge-data-instruments-virtues.js?v=d03e699e76ee"></script>
   <script src="curriculum.js?v=e1e94deb3080"></script>
   <script src="attack-fx.js?v=8d10e2b76acc"></script>
-  <script src="game.js?v=b8406a6f2de4"></script>
+  <script src="game.js?v=211974dde4ef"></script>
   <script src="boss.js?v=f5b9482a1d03"></script>
   <script src="challenge-boss.js?v=bfa99f9f14f5"></script>
 </body>
