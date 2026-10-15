@@ -22,12 +22,12 @@
 .volume-seal { font: 28px var(--serif); writing-mode: vertical-rl; letter-spacing: 8px; border: 1px solid #b0b59a; border-radius: 25px 25px 8px 8px; background: #edf0df; color: #7f8b67; padding: 18px 12px 10px; }
 .volume-heading h2 { font: 600 26px var(--serif); margin: 8px 0 10px; }
 .volume-heading p, .chapter-card p { color: #968c76; font-size: 12px; line-height: 1.8; }
-.chapter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.chapter-card { background: #f8f5e9; border: 1px solid #e0d8c4; border-top: 3px solid var(--category-color); padding: 18px 14px; border-radius: 9px; }
-.chapter-card > span { display: block; font: 36px var(--serif); color: var(--category-color); margin-bottom: 16px; }
-.chapter-card h3 { font: 600 16px var(--serif); margin: 0; }
-.chapter-card p { margin-bottom: 0; font-size: 11px; }
-.volume-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 24px; }
+.chapter-grid { display: flex; flex-direction: column; border-top: 1px solid #d9d1bc; }
+.chapter-card { display: flex; align-items: baseline; gap: 20px; padding: 24px 6px; border-bottom: 1px solid #e4ddcb; }
+.chapter-card h3 { flex-shrink: 0; font: 600 18px/1.8 var(--serif); margin: 0; color: var(--category-color); }
+.chapter-leader { flex: 1; min-width: 24px; border-bottom: 1px dotted #c6bea7; }
+.chapter-card p { margin: 0; font: 13px/1.8 var(--serif); }
+.volume-bottom { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 24px; }
 .volume-bottom p { margin: 0; font: 14px/1.8 var(--serif); }
 .volume-bottom small { font: 10px system-ui; color: #968c76; }
 .battle-route { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
@@ -58,7 +58,10 @@
   .mode-panel { padding: 18px 14px; }
   .panel-heading { display: block; margin-bottom: 16px; }
   .panel-heading h2 { font-size: 18px; margin-bottom: 7px; }
-  .category-grid, .chapter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .chapter-card { flex-wrap: wrap; gap: 6px 14px; padding: 18px 2px; }
+  .chapter-card h3 { font-size: 17px; }
+  .chapter-card p { flex-basis: 100%; font-size: 12px; }
   .category-card { padding: 14px 10px; }
   .category-card > span:not(.category-mark) { font-size: 10px; }
   .volume-heading { gap: 12px; }

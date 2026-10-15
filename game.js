@@ -227,7 +227,8 @@ function newPuzzle() {
 function chooseMode(mode) {
   selectedMode = mode;
   $('modeTitle').textContent = mode === 'learning' ? '学习模式' : '挑战模式';
-  $('modeDescription').textContent = mode === 'learning' ? '从六卷诗文中，选一卷慢慢读。' : '循着四季的诗句，开启你的江湖。';
+  $('modeDescription').textContent = mode === 'learning' ? '从六卷诗文中，选一卷慢慢读。' : '';
+  $('modeDescription').hidden = mode !== 'learning';
   $('learningPanel').hidden = mode !== 'learning';
   $('challengePanel').hidden = mode !== 'challenge';
 }
@@ -296,7 +297,9 @@ function renderModeSelection() {
   });
   $('volumeTitle').textContent = VOLUME.title;
   $('volumeDescription').textContent = VOLUME.description;
-  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" style="--category-color:${chapter.color}"><span>${chapter.season}</span><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
+  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><span class="chapter-leader" aria-hidden="true"></span><p>${chapter.description}</p></div>`).join('');
+  $('chapterPreview').setAttribute('role', 'list');
+  $('chapterPreview').setAttribute('aria-label', '四季篇目录');
   chooseMode(selectedMode);
 }
 
