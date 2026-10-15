@@ -34,6 +34,46 @@ function shuffled(values) {
 }
 
 const learningSaveKey = category => `poetry-learning-v1:${category}`;
+const PLAYER_RANKS = ['执笔小书生', '略通诗中韵', '能诗亦善对', '出口便成诗', '诗才已出众', '诗中之俊杰'];
+const rankSaveKey = 'poetry-completed-books-v1';
+const completedBooks = new Set();
+try {
+  const savedBooks = JSON.parse(localStorage.getItem(rankSaveKey) || '[]');
+  if (Array.isArray(savedBooks)) savedBooks.forEach(name => {
+    if (LEARNING_CATEGORIES.some(category => category.name === name)) completedBooks.add(name);
+  });
+} catch { /* Keep rank progress in memory when browser storage is unavailable. */ }
+
+function playerRankIndex() { return Math.min(completedBooks.size, PLAYER_RANKS.length - 1); }
+
+function completeLearningBook(showReward = false) {
+  if (state.mode !== 'learning' || !state.poemComplete
+    || state.workIndex + 1 !== learningWorks().length || completedBooks.has(state.category)) return;
+  const previousRank = playerRankIndex();
+  completedBooks.add(state.category);
+  try { localStorage.setItem(rankSaveKey, JSON.stringify([...completedBooks])); }
+  catch { /* The earned rank remains available for this session. */ }
+  if (showReward && playerRankIndex() > previousRank) {
+    const rank = playerRankIndex();
+    $('rewardRank').textContent = PLAYER_RANKS[rank];
+    $('rewardPreviousRank').textContent = PLAYER_RANKS[previousRank];
+    $('rewardBook').textContent = `《${state.category}》全卷学完`;
+    $('rewardMessage').textContent = rank === PLAYER_RANKS.length - 1
+      ? '胸藏文墨，诗意自成。你已登上诗途最高等级！'
+      : '一字一句的用心，化作此刻的进阶。下一卷，也有好风景。';
+    $('rewardLevel').textContent = `第 ${rank + 1} / ${PLAYER_RANKS.length} 级`;
+    $('rewardSteps').innerHTML = PLAYER_RANKS.map((name, index) => `<span class="reward-step${index <= rank ? ' earned' : ''}" title="${name}"></span>`).join('');
+    $('rankRewardDialog').showModal();
+  }
+}
+
+function renderPlayerRank() {
+  const rank = playerRankIndex();
+  $('playerRank').textContent = PLAYER_RANKS[rank];
+  $('playerRankLevel').textContent = `第 ${rank + 1} / ${PLAYER_RANKS.length} 级`;
+  $('playerRankProgress').textContent = `已学完 ${completedBooks.size} 本 · ${rank === PLAYER_RANKS.length - 1 ? '已达最高等级' : '再学完一本，晋升一级'}`;
+}
+
 function freshLearningOrder(category) {
   const order = shuffled(categoryWorks(category).map(work => work.title));
   try {
@@ -108,6 +148,7 @@ function restoreLearningProgress() {
     state.selected = saved.selected;
     state.assisted = new Set(saved.assisted);
     state.wrongSlots = new Set(saved.wrongSlots);
+    completeLearningBook();
     feedback('已接着上次保存的位置学习，作品顺序和已填文字均已恢复。', 'success');
     render();
   } catch { /* Ignore unavailable or outdated saves and start a fresh round. */ }
@@ -165,6 +206,7 @@ function chooseMode(mode) {
 
 function showModeSelection() {
   clearTimeout(transitionTimer);
+  $('rankRewardDialog').close();
   if (state) state.busy = true;
   $('resultDialog').close();
   $('gameScreen').hidden = true;
@@ -189,6 +231,7 @@ function startGame(mode, category = '唐诗') {
 
 function resetGame() {
   clearTimeout(transitionTimer);
+  $('rankRewardDialog').close();
   state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
     workOrder:null, workIndex:0, sentenceIndex:0, confirmedSentences:0, readPoems:{}, helpStreak:0, completedWorks:0, poemComplete:false, stage:0, hp:6, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
@@ -233,6 +276,7 @@ function controlsLocked() { return state.busy || state.over || state.poemComplet
 function render() {
   const stage = currentStage();
   const learning = state.mode === 'learning';
+  renderPlayerRank();
   $('saveLearning').hidden = !learning;
   $('saveLearning').disabled = state.busy || state.over;
   $('resetButton').textContent = learning ? '↻ 新一轮' : '↻ 重来';
@@ -493,6 +537,7 @@ function attack() {
         state.poemComplete = true;
         state.completedWorks++;
         feedback(`《${work.title}》已完整学完，回顾后再进入下一篇。`, 'success');
+        completeLearningBook(true);
       } else {
         state.sentenceIndex++;
         newPuzzle();
@@ -623,6 +668,11 @@ $('clearButton').addEventListener('click', clearSelection);
 document.querySelectorAll('[data-hint]').forEach(button => button.addEventListener('click', useHint));
 $('resetButton').addEventListener('click', resetGame);
 $('playAgain').addEventListener('click', resetGame);
+$('continueLearning').addEventListener('click', () => $('rankRewardDialog').close());
+$('closeRankReward').addEventListener('click', () => $('rankRewardDialog').close());
+$('rankRewardDialog').addEventListener('close', () => {
+  if (state?.mode === 'learning' && state.poemComplete && !$('gameScreen').hidden) $('nextPoem').focus({preventScroll:true});
+});
 $('helpButton').addEventListener('click', () => $('helpDialog').showModal());
 document.querySelectorAll('.dialog-close,.dialog-close-action').forEach(button => button.addEventListener('click', () => $('helpDialog').close()));
 $('soundButton').addEventListener('click', () => {

@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=challenge-input-2" />
+  <link rel="stylesheet" href="modes.css?v=29cea208fc9c" />
 </head>
 <body>
   <header class="topbar">
@@ -31,7 +31,7 @@
     </section>
     <section class="game-layout" id="gameScreen" hidden>
       <aside class="left-column">
-        <section class="paper player-card"><div class="section-label">我的诗途 <span>初入诗圈</span></div><div class="avatar">✎</div><h2>执笔小书生</h2><p>一卷诗书，一身少年气</p><div class="player-health-label"><span>生命</span><b id="playerHpText">6 / 6</b></div><div class="life-hearts player-track" id="playerStars" aria-label="剩余 6 颗爱心"></div><div class="player-stats"><div><strong id="defeated">0</strong><span>降服妖怪</span></div></div></section>
+        <section class="paper player-card"><div class="section-label">我的诗途 <span id="playerRankLevel">第 1 / 6 级</span></div><div class="avatar">✎</div><h2 id="playerRank" aria-live="polite">执笔小书生</h2><p id="playerRankProgress">已学完 0 本 · 再学完一本，晋升一级</p><div class="player-health-label"><span>生命</span><b id="playerHpText">6 / 6</b></div><div class="life-hearts player-track" id="playerStars" aria-label="剩余 6 颗爱心"></div><div class="player-stats"><div><strong id="defeated">0</strong><span>降服妖怪</span></div></div></section>
         <section class="paper daily-card"><div class="section-label">今日诗签 <span>宜 · 吟诗</span></div><div class="poem-vertical">长风破浪会有时<br>直挂云帆济沧海</div><p>唐 · 李白《行路难》</p><span class="small-stamp">诗意常在</span></section>
       </aside>
 
@@ -70,10 +70,24 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式按季节主题输入完整诗句、诗名和作者，答错扣一颗心，耗尽后当前章重来。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。学习模式爱心耗尽则本轮结束；挑战模式恢复六颗心并从当前章开头重来。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式按完整作品逐句拼字，标点直接显示；挑战模式按季节主题输入完整诗句、诗名和作者，答错扣一颗心，耗尽后当前章重来。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，同一篇按原文逐句学习。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>诗途共有六个等级，每首次学完一整类诗文（一本）晋升一级，并获得晋级奖励弹窗。完成单篇或重复学习同一本不重复升级，第六级封顶。等级自动保存在当前浏览器。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。学习模式爱心耗尽则本轮结束；挑战模式恢复六颗心并从当前章开头重来。</li><li>四季篇四章全部完成即获胜。「返回入口」可重新选择模式。学习模式有手动保存时会恢复进度，没有保存时开始新一轮。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
+  <dialog id="rankRewardDialog" class="rank-reward" aria-labelledby="rewardTitle" aria-describedby="rewardBook rewardRank rewardMessage">
+    <button id="closeRankReward" class="reward-close" type="button" aria-label="关闭晋级奖励">×</button>
+    <div class="reward-eyebrow"><span></span> 诗途有进 <span></span></div>
+    <h2 id="rewardTitle">晋级成功</h2>
+    <p id="rewardBook" class="reward-book"></p>
+    <div class="reward-emblem" aria-hidden="true"><span class="reward-orbit"></span><span class="reward-poem">诗</span><span class="reward-seal">晋<br>级</span><span class="reward-spark spark-one">✦</span><span class="reward-spark spark-two">✧</span></div>
+    <p class="reward-caption">获 得 新 称 号</p>
+    <h3 id="rewardRank"></h3>
+    <div class="reward-transition"><span id="rewardPreviousRank"></span><span aria-hidden="true"> → </span><span id="rewardLevel"></span></div>
+    <div id="rewardSteps" class="reward-steps" aria-hidden="true"></div>
+    <p id="rewardMessage" class="reward-message"></p>
+    <button id="continueLearning" class="primary-button" type="button" autofocus>继续学习 <span aria-hidden="true">↗</span></button>
+    <p class="reward-footnote">每学完一本，诗途更进一步</p>
+  </dialog>
   <script src="poems.js?v=474766f88c54"></script>
   <script src="curriculum.js?v=4fd71429c86d"></script>
-  <script src="game.js?v=challenge-input-2"></script>
+  <script src="game.js?v=f2e9fde195a0"></script>
 </body>
 </html>
