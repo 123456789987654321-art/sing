@@ -36,6 +36,7 @@ const path = require('node:path');
   };
   try {
     await send('Runtime.enable'); await send('Network.enable');
+    await send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
     await send('Network.setBlockedURLs', {urls:['*fonts.googleapis.com*', '*fonts.gstatic.com*']});
     await load(); await ev('localStorage.clear()'); await load();
     await ev("startGame('learning', '唐诗')");
@@ -83,6 +84,7 @@ const path = require('node:path');
       startGame('learning', '唐诗');
       while (!state.poemComplete) solve();`);
     assert.equal(await ev("document.querySelector('.player-card h2').textContent"), '执笔小书生', 'One poem is not a whole book');
+    assert.equal(await ev("document.querySelectorAll('.scene .attack-fx').length"), 1, 'A correct learning attack plays a hit effect');
     await ev(`window.fillBossTest = () => {
       const boss = state.boss;
       for (const char of [...normalize(boss.questions[boss.index].sentence)]) {
@@ -170,6 +172,7 @@ const path = require('node:path');
     assert.equal(await ev("document.querySelector('.player-card h2').textContent"), '略通诗中韵', 'A whole book promotes the player');
     assert.equal(await ev("$('rankRewardDialog').open"), true);
     assert.equal(await ev("$('rewardRank').textContent"), '略通诗中韵');
+    assert.equal(await ev("$('rewardLevel').textContent"), '略通诗中韵', 'Promotion shows old title to new title');
     assert.equal(await ev("document.activeElement.id"), 'continueLearning');
     await ev("Promise.all($('rankRewardDialog').getAnimations().map(animation => animation.finished))");
     for (const width of [1366, 390, 320]) {
@@ -218,11 +221,14 @@ const path = require('node:path');
       }; startGame('challenge');`);
     assert.equal(await ev('document.querySelector(".help-tooltip-wrap").hidden'), false, 'Challenge has a help button');
     await ev('useHint()');
-    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然');
+    assert.equal(await ev("$('challengeTitle').value"), '春晓');
+    assert.equal(await ev("$('challengeAuthor').value"), '孟浩然');
+    assert.equal(await ev("$('challengeVerse').value"), '');
+    assert.equal(await ev("$('challengeHint')"), null, 'Help is entered in the form without an extra panel');
     await ev('useHint()');
-    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然\n春眠不觉晓');
+    assert.equal(await ev("$('challengeVerse').value"), '春眠不觉晓，');
     await ev('useHint()');
-    assert.equal(await ev("$('challengeHint').textContent"), '《春晓》—孟浩然\n春眠不觉晓\n处处闻啼鸟');
+    assert.equal(await ev("$('challengeVerse').value"), '春眠不觉晓，处处闻啼鸟。');
     assert.equal(await ev('document.querySelector("[data-hint]").disabled'), true);
     for (const width of [1366, 320]) {
       await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
@@ -230,20 +236,33 @@ const path = require('node:path');
       const shot = await send('Page.captureScreenshot', {format:'png'});
       fs.writeFileSync(`.browser-check/challenge-help-${width}.png`, Buffer.from(shot.data, 'base64'));
     }
+    await send('Emulation.setDeviceMetricsOverride', {width:1366, height:844, deviceScaleFactor:1, mobile:false});
+    await send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+    await ev('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
     await ev(`$('challengeVerse').value = '春眠不觉晓，处处闻啼鸟。';
       $('challengeTitle').value = '春晓'; $('challengeAuthor').value = '孟浩然'; attackChallenge();`);
+    assert.equal(await ev("getComputedStyle(document.querySelector('.attack-fx')).pointerEvents"), 'none', 'Attack art never blocks input');
+    await ev("for(const a of document.querySelector('.attack-fx').getAnimations({subtree:true})) {a.pause();a.currentTime=130}");
+    const attackShot = await send('Page.captureScreenshot', {format:'png'});
+    fs.writeFileSync('.browser-check/attack-effect.png', Buffer.from(attackShot.data, 'base64'));
+    await send('Emulation.setEmulatedMedia', {features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+    assert.equal(await ev("getComputedStyle(document.querySelector('.attack-slash')).display"), 'none', 'Reduced motion omits the slash');
+    assert.equal(await ev("getComputedStyle($('monster')).animationName"), 'none', 'Reduced motion omits impact shaking');
     assert.equal(await ev("$('readingText').textContent"), '春眠不觉晓，处处闻啼鸟。《春晓》—孟浩然');
     assert.equal(await ev("$('readingAuthor').hidden"), true);
-    assert.equal(await ev("$('challengeHint').hidden"), true, 'Help resets after correct answer');
+    assert.equal(await ev("$('challengeVerse').value"), '', 'Help resets after correct answer');
+    assert.equal(await ev("$('challengeTitle').value"), '');
     await ev('useHint()');
     assert.equal(await ev('state.challengeHintStep'), 1);
     await ev('showModeSelection()');
+    assert.equal(await ev('attackEffects.size'), 0, 'Leaving removes attack effects and their timers');
     assert.equal(await ev('document.querySelectorAll("[data-entry-mode=test]").length'), 1);
     for (const width of [1366, 320]) {
       await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
       assert(await ev('document.documentElement.scrollWidth <= innerWidth'));
       const shot = await send('Page.captureScreenshot', {format:'png'});
       fs.writeFileSync(`.browser-check/test-entry-${width}.png`, Buffer.from(shot.data, 'base64'));
+      assert(await ev('document.querySelector(".entry-content").getBoundingClientRect().top - document.querySelector(".topbar").getBoundingClientRect().bottom < 65'), 'Entry content sits close to the header');
     }
     await ev('document.querySelector("[data-entry-mode=test]").click()');
     assert.equal(await ev('state.mode'), 'test');

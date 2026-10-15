@@ -72,7 +72,7 @@ function showRankReward(previousRank, achievement) {
     $('rewardMessage').textContent = rank === PLAYER_RANKS.length - 1
       ? '胸藏文墨，诗意自成。你已登上诗途最高等级！'
       : '一字一句的用心，化作此刻的进阶。下一卷，也有好风景。';
-    $('rewardLevel').textContent = `第 ${rank + 1} / ${PLAYER_RANKS.length} 级`;
+    $('rewardLevel').textContent = PLAYER_RANKS[rank];
     $('rewardSteps').innerHTML = PLAYER_RANKS.map((name, index) => `<span class="reward-step${index <= rank ? ' earned' : ''}" title="${name}"></span>`).join('');
     $('rankRewardDialog').showModal();
   }
@@ -234,7 +234,9 @@ function chooseMode(mode) {
 
 function showModeSelection() {
   clearTimeout(transitionTimer);
+  clearAttackEffects();
   $('bossDialog').close();
+  $('challengeBossDialog').close();
   $('rankRewardDialog').close();
   if (state) state.busy = true;
   $('resultDialog').close();
@@ -260,11 +262,16 @@ function startGame(mode, category = '唐诗') {
 
 function resetGame() {
   clearTimeout(transitionTimer);
+  clearAttackEffects();
   $('bossDialog').close();
+  $('challengeBossDialog').close();
   $('rankRewardDialog').close();
   state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
     workOrder:null, workIndex:0, sentenceIndex:0, confirmedSentences:0, readPoems:{}, helpStreak:0, completedWorks:0, poemComplete:false, boss:null, bossClearedAt:0, stage:0, hp:6, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
+  state.challengeCorrect = 0;
+  state.challengeBossWins = 0;
+  state.challengeBoss = null;
   state.learningPreview = state.mode === 'learning';
   if (state.mode === 'learning') state.workOrder = freshLearningOrder(state.category);
   if (state.mode === 'challenge') prepareDeck();
@@ -302,7 +309,7 @@ function pendingHelpIndex() {
 function potentialDamage() {
   return ([...state.question.answer].length - state.assisted.size) * 2;
 }
-function controlsLocked() { return state.busy || state.over || state.poemComplete || state.learningPreview; }
+function controlsLocked() { return state.busy || state.over || state.poemComplete || state.learningPreview || !!state.challengeBoss; }
 
 function render() {
   const stage = currentStage();
@@ -424,6 +431,7 @@ function renderPuzzle() {
   const challenge = state.mode === 'challenge';
   const preview = state.mode === 'learning' && state.learningPreview;
   $('challengeForm').hidden = !challenge;
+  $('challengeBossResume').hidden = !challenge || !state.challengeBoss;
   $('answerSlots').hidden = challenge || state.poemComplete || preview;
   $('characterBank').hidden = challenge || state.poemComplete || preview;
   $('tileActions').hidden = challenge || state.poemComplete || preview;
@@ -431,8 +439,7 @@ function renderPuzzle() {
   $('verseClue').hidden = preview;
   document.querySelector('.reading-card').hidden = preview;
   document.querySelector('.help-tooltip-wrap').hidden = false;
-  $('helpTooltip').textContent = challenge ? '依次提示诗名与作者、前半句、后半句' : '每帮助一个字，这个字就没有攻击力';
-  $('challengeHint').hidden = !challenge || !state.challengeHintStep;
+  $('helpTooltip').textContent = challenge ? '依次填入诗名与作者、前半句，再补全整句' : '每帮助一个字，这个字就没有攻击力';
   document.querySelectorAll('[data-hint]').forEach(button => {
     button.textContent = challenge ? `✧ 帮助 ${state.challengeHintStep || 0}/3` : '✧ 帮助';
   });
@@ -442,10 +449,11 @@ function renderPuzzle() {
   $('gameScreen').classList.toggle('challenge-game', challenge);
   document.querySelector('.battle-footer > span').textContent = challenge ? '答错扣一颗心 · 耗尽后本章重来' : '每个自行选出的字 · 2 点伤害';
   if (challenge) {
-    renderChallengeHint();
     document.querySelectorAll('[data-hint]').forEach(button => { button.disabled = locked || !state.challengeHint || state.challengeHintStep >= 3; });
     $('verseClue').textContent = `请写出关于「${currentStage().season}」的完整一句诗，并填写诗名和作者。`;
-    $('comboText').textContent = `已答对 ${state.solved} 句 · 每个字造成 2 点伤害`;
+    $('comboText').textContent = `已答对 ${state.challengeCorrect} / 40 句 · 已击败 ${state.challengeBossWins} / 4 位 Boss`;
+    if (state.challengeBoss) $('verseClue').textContent = `第 ${state.challengeBoss.checkpoint} 句已完成，先击败${state.challengeBoss.kind} Boss 再继续。`;
+    else if (!state.over) $('verseClue').textContent += ` 再答对 ${10 - state.challengeCorrect % 10} 句迎战${CHALLENGE_BOSS_KINDS[state.challengeBossWins]} Boss。`;
     [...$('challengeForm').elements].forEach(element => element.disabled = locked);
     return;
   }
@@ -538,6 +546,7 @@ function useHint() {
   if (state.mode === 'challenge') {
     if (!state.challengeHint || state.challengeHintStep >= 3) return;
     state.challengeHintStep++;
+    fillChallengeHint(state.challengeHint, state.challengeHintStep);
     renderPuzzle();
     return;
   }
@@ -565,14 +574,14 @@ function feedback(message, type = '') {
   $('feedback').className = `feedback ${type}`;
 }
 
-function renderChallengeHint() {
-  const hint = state.challengeHint;
-  if (!hint || !state.challengeHintStep) { $('challengeHint').textContent = ''; return; }
-  const halves = hint.sentence.replace(/[。！？!?]+$/u, '').split(/[，,]/u);
-  const lines = [`《${hint.title}》—${hint.author}`];
-  if (state.challengeHintStep >= 2) lines.push(halves[0]);
-  if (state.challengeHintStep >= 3) lines.push(halves.slice(1).join('，'));
-  $('challengeHint').textContent = lines.join('\n');
+function fillChallengeHint(hint, step, fields = ['challengeVerse', 'challengeTitle', 'challengeAuthor']) {
+  if (step === 1) {
+    $(fields[1]).value = hint.title;
+    $(fields[2]).value = hint.author;
+  } else if (step === 2) {
+    const comma = hint.sentence.search(/[，,]/u);
+    $(fields[0]).value = comma < 0 ? hint.sentence : hint.sentence.slice(0, comma + 1);
+  } else if (step === 3) $(fields[0]).value = hint.sentence;
 }
 
 function attack() {
@@ -602,7 +611,14 @@ function attack() {
     }
     render();
     feedback(previousRank < PLAYER_RANKS.length - 1 ? '测试通过，晋升一级！' : '测试通过，你已达到最高等级！', 'success');
-    showRankReward(previousRank, '床前明月光 · 测试通过');
+    playAttackEffect(document.querySelector('.scene'), $('monster'), 10);
+    playTone(true);
+    state.busy = true;
+    transitionTimer = setTimeout(() => {
+      state.busy = false;
+      showRankReward(previousRank, '床前明月光 · 测试通过');
+      render();
+    }, 850);
     return;
   }
   state.helpStreak = state.assisted.size ? state.helpStreak + 1 : 0;
@@ -621,9 +637,7 @@ function attack() {
   state.score += damage;
   state.solved++;
   state.busy = true;
-  $('damage').textContent = damage ? `−${damage}` : '0';
-  $('damage').classList.remove('show'); void $('damage').offsetWidth; $('damage').classList.add('show');
-  if (damage) { $('monster').classList.remove('hit'); void $('monster').offsetWidth; $('monster').classList.add('hit'); }
+  playAttackEffect(document.querySelector('.scene'), $('monster'), damage);
   feedback(`「${answer}」拼对了！${state.assisted.size ? `帮助 ${state.assisted.size} 字，` : ''}造成 ${damage} 点伤害。${helpPenalty ? ` ${helpMajority ? '本句帮助字数超过自行填写' : '连续三句使用帮助'}，扣 1 颗爱心。` : ''}`, helpPenalty ? 'error' : 'success');
   $('enemySpeech').textContent = state.enemyHp ? (damage ? '哎哟！这句诗，有点厉害…' : '这句学会啦，下句自己来！') : '好诗好诗！小妖甘拜下风…';
   playTone(state.enemyHp === 0);
@@ -718,6 +732,7 @@ function attackChallenge() {
     return;
   }
   state.usedVerses.push(key);
+  state.challengeCorrect++;
   state.lastChallenge = {title:work.title, author:work.author, sentence};
   const damage = normalize(sentence).length * 2;
   state.enemyHp = Math.max(0, state.enemyHp - damage);
@@ -725,20 +740,12 @@ function attackChallenge() {
   state.solved++;
   state.busy = true;
   feedback(`答对了！造成 ${damage} 点伤害。`, 'success');
+  playAttackEffect(document.querySelector('.scene'), $('monster'), damage);
   playTone(state.enemyHp === 0);
   render();
   transitionTimer = setTimeout(() => {
-    if (!state.enemyHp) {
-      state.defeated++;
-      if (state.stage === VOLUME.chapters.length - 1) { finish(true); return; }
-      state.stage++;
-      state.enemyHp = currentStage().hp;
-      prepareDeck();
-      feedback(`进入${currentStage().chapter}，请按新的主题作答。`, 'success');
-    }
-    state.busy = false;
-    newPuzzle();
-    render();
+    if (state.challengeCorrect % 10 === 0) queueChallengeBoss();
+    else advanceChallengeRound();
   }, 850);
 }
 $('challengeForm').addEventListener('submit', event => { event.preventDefault(); attackChallenge(); });
@@ -749,6 +756,7 @@ function finish(won) {
   render();
   $('resultTitle').textContent = won ? '诗出有名，名满诗圈！' : '爱心用完了，再来一轮吧';
   $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '四季篇四章已过，每一个字都有力量。' : '填错、连续三句使用帮助或帮助字数过半会扣爱心。重新开始可恢复 6 颗爱心。'}`;
+  if (won && state.mode === 'challenge') $('resultDescription').textContent = `你答对了 ${state.challengeCorrect} 句四季诗文，并以每场三句击败五言、七言、四言、杂言四位 Boss。四季试炼已完成！`;
   $('resultDialog').showModal();
 }
 

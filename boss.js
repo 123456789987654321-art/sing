@@ -65,6 +65,7 @@ function openBossBattle() {
 
 function startBossBattle() {
   if (!state.boss || !['intro','lost'].includes(state.boss.status)) return;
+  clearAttackEffects();
   state.boss.status = 'active';
   state.boss.hp = 6;
   state.boss.index = 0;
@@ -120,12 +121,14 @@ function submitBossAnswer() {
   }
   saveLearningProgress(true);
   renderBossBattle();
+  if (!boss.wrong.length) playAttackEffect($('bossDialog'), document.querySelector('.boss-banner'), 1, '破墨 −1');
   if (boss.status === 'won') $('bossContinue').focus({preventScroll:true});
   if (boss.status === 'lost') $('bossStart').focus({preventScroll:true});
 }
 
 function finishBossBattle() {
   if (state.boss?.status !== 'won') return;
+  clearAttackEffects();
   state.boss = null;
   $('bossDialog').close();
   saveLearningProgress(true);
@@ -197,5 +200,6 @@ $('bossSubmit').addEventListener('click', submitBossAnswer);
 $('bossContinue').addEventListener('click', finishBossBattle);
 $('bossPause').addEventListener('click', () => $('bossDialog').close());
 $('bossDialog').addEventListener('close', () => {
+  clearAttackEffect($('bossDialog'));
   if (state?.mode === 'learning' && !$('gameScreen').hidden) { render(); $('nextPoem').focus({preventScroll:true}); }
 });

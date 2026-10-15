@@ -38,6 +38,12 @@
 .boss-dialog .primary-button { min-height: 46px; }
 .boss-pause { display: block; margin: 16px auto 0; min-height: 40px; }
 .boss-dialog .boss-save-note { margin: 6px 0 0; font-size: 10px; color: #8c856d; letter-spacing: 1px; }
+.challenge-boss-help { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 16px 0 12px; text-align: left; }
+.challenge-boss-help .boss-rule { margin: 0; }
+.challenge-boss-help .puzzle-help { flex-shrink: 0; }
+.boss-dialog .challenge-form { text-align: left; margin-top: 12px; }
+.boss-dialog .challenge-form textarea { min-height: 86px; }
+.boss-dialog .challenge-form .primary-button { display: block; margin: 8px auto 0; }
 @keyframes boss-arrival { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @media (max-width: 600px) { .boss-dialog { padding: 22px 18px 14px; } .boss-banner { margin-left: -2px; margin-right: -2px; gap: 9px; } .boss-banner h2 { font-size: 27px; letter-spacing: 3px; } .boss-dialog[data-phase="active"] .boss-banner h2 { font-size: 20px; } .boss-kicker { font-size: 10px; letter-spacing: 1px; } .boss-slots { padding: 9px 6px; gap: 4px; } .boss-slot { width: 32px; } .boss-portrait { margin-top: 20px; } }
 @media (prefers-reduced-motion: reduce) { .boss-dialog[open] { animation: none; } .boss-health > span { transition: none; } }

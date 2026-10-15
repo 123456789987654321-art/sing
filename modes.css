@@ -79,10 +79,10 @@
 }
 @media (max-width: 360px) { .battle .speech { width: 115px; } }
 /* A quiet entry screen with vertically ordered mode buttons. */
-.entry-screen { position: relative; display: grid; place-items: center; min-height: calc(100dvh - 100px); max-width: 1100px; width: 94%; margin: 0 auto; padding: 40px 20px; overflow: hidden; }
+.entry-screen { position: relative; display: grid; align-items: start; justify-items: center; min-height: calc(100dvh - 100px); max-width: 1100px; width: 94%; margin: 0 auto; padding: 16px 20px 24px; overflow: hidden; }
 .entry-content { position: relative; z-index: 1; width: min(100%, 400px); text-align: center; }
-.entry-content h1 { font: 600 46px var(--serif); letter-spacing: 10px; margin: 20px 0 14px; padding-left: 10px; }
-.entry-subtitle { font: 14px/1.8 var(--serif); letter-spacing: 2px; color: #8e856e; margin: 0 0 40px; }
+.entry-content h1 { font: 600 46px var(--serif); letter-spacing: 10px; margin: 14px 0 10px; padding-left: 10px; }
+.entry-subtitle { font: 14px/1.8 var(--serif); letter-spacing: 2px; color: #8e856e; margin: 0 0 24px; }
 .entry-actions { display: flex; flex-direction: column; gap: 18px; }
 .entry-button { display: flex; align-items: center; gap: 18px; padding: 23px 25px; width: 100%; border: 1px solid #b7bea1; border-radius: 13px; text-align: left; background: #f7f9ec; box-shadow: 0 4px 0 #c0c7ac60; }
 .entry-icon { display: grid; place-items: center; width: 46px; height: 50px; flex: none; border: 1px solid #bdc6a4; border-radius: 8px; background: #e9edda; font: 28px var(--serif); color: #7d8b62; }
@@ -95,7 +95,7 @@
 .entry-test { background: #f5f0f5; border-color: #bfb0c3; box-shadow: 0 4px 0 #bfb0c350; }
 .entry-test .entry-icon { background: #eae1ed; border-color: #c6b7cc; color: #88728f; }
 .entry-test b { color: #88728f; }
-.entry-note { font: 11px var(--serif); letter-spacing: 2px; color: #a1977e; margin: 32px 0 0; }
+.entry-note { font: 11px var(--serif); letter-spacing: 2px; color: #a1977e; margin: 22px 0 0; }
 .entry-decoration { position: absolute; width: 590px; height: 590px; border-radius: 50%; border: 1px solid #b5b99b35; background: radial-gradient(circle, #f9f5e450, #e1e4c420 65%, transparent 66%); pointer-events: none; }
 .entry-decoration::before, .entry-decoration::after { content: ''; position: absolute; border: 1px solid #bdc1a42b; border-radius: 50%; inset: 32px; }
 .entry-decoration::after { inset: -32px; }
@@ -103,9 +103,9 @@
 .entry-decoration i { position: absolute; width: 82px; height: 82px; border-radius: 50%; background: #ddcc9d25; bottom: 22px; left: 20px; }
 .entry-back { margin-bottom: 14px; }
 @media (max-width: 600px) {
-  .entry-screen { min-height: calc(100dvh - 80px); width: 100%; padding: 28px 24px; }
+  .entry-screen { min-height: calc(100dvh - 80px); width: 100%; padding: 14px 24px 24px; }
   .entry-content h1 { font-size: 38px; letter-spacing: 7px; padding-left: 7px; }
-  .entry-subtitle { font-size: 12px; margin-bottom: 32px; }
+  .entry-subtitle { font-size: 12px; margin-bottom: 22px; }
   .entry-button { padding: 20px 16px; gap: 12px; }
   .entry-button strong { font-size: 20px; }
   .entry-button small { font-size: 10px; }
@@ -190,7 +190,6 @@
 /* Keep each confirmed sentence on one visual line, including its punctuation. */
 .reading-text, .learning-summary #completedPoemText { container-type: inline-size; min-width: 0; max-width: 100%; white-space: normal; overflow: auto; overflow-wrap: normal; }
 .reading-line { display: block; white-space: nowrap; overflow-wrap: normal; word-break: keep-all; font-size: 16px; font-size: clamp(11px, calc(100cqw / var(--line-chars)), 16px); line-height: 2.2; }
-.challenge-hint { padding: 12px 16px; margin: 12px 0; border: 1px solid #c8ceb6; border-radius: 10px; background: #f1f3e6; color: #65714f; white-space: pre-line; font: 15px/1.9 var(--serif); }
 .learning-preview-game .scene { display: none; }
 .learning-preview { padding: 22px; border: 1px solid #d7ceb6; border-radius: 12px; background: #fffdf4; }
 .preview-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
