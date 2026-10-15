@@ -228,11 +228,22 @@ function newPuzzle() {
 
 function chooseMode(mode) {
   selectedMode = mode;
+  $('challengeVolumeDetails').hidden = true;
+  $('challengeVolumeList').hidden = false;
+  $('entryBack').textContent = '← 返回入口';
   $('modeTitle').textContent = mode === 'learning' ? '学习模式' : '挑战模式';
   $('modeDescription').textContent = mode === 'learning' ? '从六卷诗文中，选一卷慢慢读。' : '';
   $('modeDescription').hidden = mode !== 'learning';
   $('learningPanel').hidden = mode !== 'learning';
   $('challengePanel').hidden = mode !== 'challenge';
+}
+
+function openChallengeVolume() {
+  $('challengeVolumeList').hidden = true;
+  $('challengeVolumeDetails').hidden = false;
+  $('entryBack').textContent = '← 返回章节';
+  $('volumeTitle').focus({preventScroll:true});
+  window.scrollTo(0, 0);
 }
 
 function showModeSelection() {
@@ -297,7 +308,8 @@ function renderModeSelection() {
     button.addEventListener('click', () => startGame('learning', category.name));
     $('categoryGrid').append(button);
   });
-  $('volumeTitle').textContent = VOLUME.title;
+  $('volumeTitle').textContent = '第一章 · 四季';
+  $('challengeVolumeSummary').textContent = VOLUME.description;
   $('volumeDescription').textContent = VOLUME.description;
   $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
   $('chapterPreview').setAttribute('role', 'list');
@@ -444,7 +456,7 @@ function renderPuzzle() {
   $('verseClue').hidden = preview;
   document.querySelector('.reading-card').hidden = preview;
   document.querySelector('.help-tooltip-wrap').hidden = false;
-  $('helpTooltip').textContent = challenge ? '依次填入诗名与作者、前半句，再补全整句' : '每帮助一个字，这个字就没有攻击力';
+  $('helpTooltip').textContent = challenge ? '依次填入诗名与作者、前半句，再补全整句' : '每使用一次帮助，对应的字即失去攻击力。';
   document.querySelectorAll('[data-hint]').forEach(button => {
     button.textContent = challenge ? `✧ 帮助 ${state.challengeHintStep || 0}/3` : '✧ 帮助';
   });
@@ -848,7 +860,14 @@ document.querySelectorAll('[data-entry-mode]').forEach(button => {
     window.scrollTo(0, 0);
   });
 });
-$('entryBack').addEventListener('click', showModeSelection);
+$('openChallengeVolume').addEventListener('click', openChallengeVolume);
+$('entryBack').addEventListener('click', () => {
+  if (selectedMode === 'challenge' && !$('challengeVolumeDetails').hidden) {
+    chooseMode('challenge');
+    $('openChallengeVolume').focus({preventScroll:true});
+    window.scrollTo(0, 0);
+  } else showModeSelection();
+});
 $('startChallenge').addEventListener('click', () => startGame('challenge'));
 $('modeButton').addEventListener('click', showModeSelection);
 $('resultModeButton').addEventListener('click', showModeSelection);

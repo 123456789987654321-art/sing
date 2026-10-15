@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style.css?v=0a0083d9a652" />
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
-  <link rel="stylesheet" href="modes.css?v=521069ab500b" />
+  <link rel="stylesheet" href="modes.css?v=07be306ff928" />
   <link rel="stylesheet" href="boss.css?v=b4b07ae7fc5c" />
   <link rel="stylesheet" href="attack-fx.css?v=45cdeb5523a2" />
 </head>
@@ -29,7 +29,20 @@
       <button class="text-button return-button entry-back" id="entryBack">← 返回入口</button><div class="mode-heading"><span class="mode-kicker">诗出有名</span><h1 id="modeTitle">学习模式</h1><p id="modeDescription">从六卷诗文中，选一卷慢慢读。</p></div>
 
       <section class="paper mode-panel" id="learningPanel" aria-label="学习分类"><div class="panel-heading"><h2>从哪一卷读起？</h2></div><div class="category-grid" id="categoryGrid"></div></section>
-      <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden><div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战</span><h2 id="volumeTitle"></h2><p id="volumeDescription"></p></div></div><div class="chapter-grid" id="chapterPreview"></div><div class="volume-bottom"><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div></section>
+      <section class="paper mode-panel challenge-panel" id="challengePanel" aria-label="挑战篇章" hidden>
+        <div id="challengeVolumeList">
+          <button id="openChallengeVolume" class="challenge-volume-card" type="button" aria-controls="challengeVolumeDetails">
+            <span class="volume-seal" aria-hidden="true">四季</span>
+            <span class="challenge-volume-copy"><span class="mode-kicker">篇章挑战</span><strong>第一章 · 四季</strong><span id="challengeVolumeSummary"></span></span>
+            <span class="challenge-volume-arrow" aria-hidden="true">↗</span>
+          </button>
+        </div>
+        <div id="challengeVolumeDetails" hidden>
+          <div class="volume-heading"><span class="volume-seal">四季</span><div><span class="mode-kicker">篇章挑战</span><h2 id="volumeTitle" tabindex="-1"></h2><p id="volumeDescription"></p></div></div>
+          <div class="chapter-grid" id="chapterPreview"></div>
+          <div class="volume-bottom"><button class="primary-button" id="startChallenge">进入四季篇 <span>↗</span></button></div>
+        </div>
+      </section>
     </section>
     <section class="game-layout" id="gameScreen" hidden>
       <aside class="left-column">
@@ -50,7 +63,7 @@
           <span class="scene-caption">山林有小妖，待君以诗降。</span>
         </div>
         <div class="writing-area tile-arena">
-          <div class="puzzle-heading"><h3><span>✦</span> 选字成诗</h3><span class="help-tooltip-wrap"><button class="puzzle-help" data-hint type="button" aria-describedby="helpTooltip">✧ 帮助</button><span class="help-tooltip" id="helpTooltip" role="tooltip">每帮助一个字，这个字就没有攻击力</span></span></div><span class="sr-only" id="poemSource"></span>
+          <div class="puzzle-heading"><h3><span>✦</span> 选字成诗</h3><span class="help-tooltip-wrap"><button class="puzzle-help" data-hint type="button" aria-describedby="helpTooltip">✧ 帮助</button><span class="help-tooltip" id="helpTooltip" role="tooltip">每使用一次帮助，对应的字即失去攻击力。</span></span></div><span class="sr-only" id="poemSource"></span>
           <p class="verse-clue" id="verseClue"></p>
           <section id="learningPreview" class="learning-preview" aria-labelledby="previewTitle" hidden><div class="preview-heading"><div><span class="mode-kicker">先读原文 · 再试身手</span><h3 id="previewTitle"></h3><p id="previewAuthor"></p></div><button id="startLearningChallenge" class="primary-button" type="button">开始挑战 <span aria-hidden="true">↗</span></button></div><div id="previewText" class="preview-text"></div><p class="preview-note">先读一遍，记住诗句。准备好后，点击「开始挑战」拼出整篇。</p></section>
           <div class="puzzle-stats"><span>本句帮助 <b id="hintCount">0 次</b></span><span>可造成伤害 <b id="potentialDamage">0 点</b></span></div>
@@ -127,7 +140,7 @@
   </dialog>
   <script src="curriculum.js?v=4fd71429c86d"></script>
   <script src="attack-fx.js?v=8d10e2b76acc"></script>
-  <script src="game.js?v=740633e926af"></script>
+  <script src="game.js?v=03059481299f"></script>
   <script src="boss.js?v=f5b9482a1d03"></script>
   <script src="challenge-boss.js?v=4a7b86c74790"></script>
 </body>
