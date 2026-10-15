@@ -263,6 +263,7 @@ function openChallengeVolume(volumeId = selectedVolumeId) {
   $('chapterPreview').setAttribute('aria-label', `${volume.name}篇目录`);
   $('challengeVolumeList').hidden = true;
   $('challengeVolumeDetails').hidden = false;
+  $('chapterPreview').scrollLeft = 0;
   $('entryBack').textContent = '← 返回章节';
   $('volumeTitle').focus({preventScroll:true});
   window.scrollTo(0, 0);
