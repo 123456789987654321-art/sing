@@ -53,7 +53,7 @@ try {
 function playerRankIndex() { return Math.min(completedBooks.size + testPromotions, PLAYER_RANKS.length - 1); }
 
 function completeLearningBook(showReward = false) {
-  if (state.mode !== 'learning' || !state.poemComplete
+  if (state.mode !== 'learning' || !state.poemComplete || state.boss
     || state.workIndex + 1 !== learningWorks().length || completedBooks.has(state.category)) return;
   const previousRank = playerRankIndex();
   completedBooks.add(state.category);
@@ -97,9 +97,10 @@ function freshLearningOrder(category) {
   return order;
 }
 
-function saveLearningProgress() {
+function saveLearningProgress(silent = false) {
   if (state.mode !== 'learning' || state.busy || state.over) return;
-  const save = {version:2, category:state.category, order:state.workOrder,
+  const save = {version:3, category:state.category, order:state.workOrder,
+    boss:state.boss, bossClearedAt:state.bossClearedAt,
     learningPreview:state.learningPreview,
     workIndex:state.workIndex, sentenceIndex:state.sentenceIndex, poemComplete:state.poemComplete,
     sentence:state.question.sentence, tiles:state.tiles.map(tile => tile.char), selected:state.selected,
@@ -107,7 +108,7 @@ function saveLearningProgress() {
     defeated:state.defeated, enemyHp:state.enemyHp, hp:state.hp, helpStreak:state.helpStreak};
   try {
     localStorage.setItem(learningSaveKey(state.category), JSON.stringify(save));
-    feedback('进度已保存在此浏览器，下次进入这一类会按原顺序继续。', 'success');
+    if (silent !== true) feedback('进度已保存在此浏览器，下次进入这一类会按原顺序继续。', 'success');
   } catch {
     feedback('浏览器未能保存进度，请检查是否允许网站存储。', 'error');
   }
@@ -119,7 +120,7 @@ function restoreLearningProgress() {
     if (!saved) return;
     const works = categoryWorks(state.category);
     const inRange = (value, max) => Number.isInteger(value) && value >= 0 && value < max;
-    if (![1,2].includes(saved.version) || saved.category !== state.category || !Array.isArray(saved.order)
+    if (![1,2,3].includes(saved.version) || saved.category !== state.category || !Array.isArray(saved.order)
       || saved.order.length !== works.length || new Set(saved.order).size !== works.length
       || !saved.order.every(title => works.some(work => work.title === title))
       || !inRange(saved.workIndex, works.length)) return;
@@ -162,9 +163,11 @@ function restoreLearningProgress() {
     state.selected = saved.selected;
     state.assisted = new Set(saved.assisted);
     state.wrongSlots = new Set(saved.wrongSlots);
+    restoreLearningBoss(saved);
     completeLearningBook();
     feedback('已接着上次保存的位置学习，作品顺序和已填文字均已恢复。', 'success');
     render();
+    if (state.boss) openBossBattle();
   } catch { /* Ignore unavailable or outdated saves and start a fresh round. */ }
 }
 
@@ -231,6 +234,7 @@ function chooseMode(mode) {
 
 function showModeSelection() {
   clearTimeout(transitionTimer);
+  $('bossDialog').close();
   $('rankRewardDialog').close();
   if (state) state.busy = true;
   $('resultDialog').close();
@@ -256,9 +260,10 @@ function startGame(mode, category = '唐诗') {
 
 function resetGame() {
   clearTimeout(transitionTimer);
+  $('bossDialog').close();
   $('rankRewardDialog').close();
   state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
-    workOrder:null, workIndex:0, sentenceIndex:0, confirmedSentences:0, readPoems:{}, helpStreak:0, completedWorks:0, poemComplete:false, stage:0, hp:6, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
+    workOrder:null, workIndex:0, sentenceIndex:0, confirmedSentences:0, readPoems:{}, helpStreak:0, completedWorks:0, poemComplete:false, boss:null, bossClearedAt:0, stage:0, hp:6, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
   state.learningPreview = state.mode === 'learning';
   if (state.mode === 'learning') state.workOrder = freshLearningOrder(state.category);
@@ -357,13 +362,14 @@ function renderLearning() {
   if (state.poemComplete) {
     $('completedPoemTitle').textContent = `《${work.title}》学完了`;
     renderPoemLines($('completedPoemText'), work.sentences);
-    $('nextPoem').textContent = state.workIndex + 1 < learningWorks().length ? '下一篇 →' : '本卷学完，返回入口';
+    $('nextPoem').textContent = state.boss ? (state.boss.status === 'won' ? '继续学习 →' : '迎战 Boss →') : state.workIndex + 1 < learningWorks().length ? '下一篇 →' : '本卷学完，返回入口';
   }
 }
 
 function nextLearningWork() {
   if (state.mode === 'test' && state.poemComplete) { showModeSelection(); return; }
   if (state.mode !== 'learning' || !state.poemComplete) return;
+  if (state.boss) { openBossBattle(); return; }
   if (state.workIndex + 1 === learningWorks().length) { showModeSelection(); return; }
   state.workIndex++;
   state.sentenceIndex = 0;
@@ -633,6 +639,8 @@ function attack() {
         state.poemComplete = true;
         state.completedWorks++;
         feedback(`《${work.title}》已完整学完，回顾后再进入下一篇。`, 'success');
+        queueLearningBoss();
+        if (state.boss) saveLearningProgress(true);
         completeLearningBook(true);
       } else {
         state.sentenceIndex++;
@@ -640,6 +648,7 @@ function attack() {
         feedback('这一句拼对了，继续同一篇的下一句。', 'success');
       }
       render();
+      if (state.boss) openBossBattle();
       return;
     }
     if (state.enemyHp === 0) {

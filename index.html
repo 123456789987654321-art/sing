@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="layout.css?v=bdf0a2626d03" />
   <link rel="stylesheet" href="tiles.css?v=870683788c18" />
   <link rel="stylesheet" href="modes.css?v=8b9a826d8ec2" />
+  <link rel="stylesheet" href="boss.css?v=4ea06c38d05a" />
 </head>
 <body>
   <header class="topbar">
@@ -72,7 +73,7 @@
     </section>
     <footer class="page-footer"><span>✦</span> 不必字字珠玑，只愿句句有诗意 <span>✦</span><small>诗出有名 · 诗词闯关小游戏</small></footer>
   </main>
-  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式先阅读完整作品，点击「开始挑战」后逐句拼字，标点直接显示；挑战模式按季节主题输入完整诗句、诗名和作者，答错扣一颗心，耗尽后当前章重来。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，每篇先展示全文供记忆，点击「开始挑战」后按原文逐句拼诗。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>诗途共有六个等级，每首次学完一整类诗文（一本）晋升一级，并获得晋级奖励弹窗。完成单篇或重复学习同一本不重复升级，第六级封顶。等级自动保存在当前浏览器。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>挑战模式点击「帮助」，第一次提示诗名和作者，第二次提示前半句，第三次提示后半句；答对进入下一题后重新计数。</li><li>「测试」板块只需拼出「床前明月光」即可晋升一级，每轮最多晋升一次，最高第六级。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。学习模式爱心耗尽则本轮结束；挑战模式恢复六颗心并从当前章开头重来。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
+  <dialog id="helpDialog"><button class="dialog-close" aria-label="关闭">×</button><span class="dialog-symbol">✎</span><h2>选字成诗，以诗出招</h2><p>学习模式先阅读完整作品，点击「开始挑战」后逐句拼字，标点直接显示；挑战模式按季节主题输入完整诗句、诗名和作者，答错扣一颗心，耗尽后当前章重来。选好文字后点击「以诗出招」。</p><ul><li>学习模式可选六类完整诗文，每轮随机排列完整作品，每篇先展示全文供记忆，点击「开始挑战」后按原文逐句拼诗。未保存时重新进入会重新打乱；点击「保存进度」后，在此浏览器继续原来的顺序和填写位置。以句号分句，逗号等标点直接显示，每个汉字一个框；整篇填完再进入下一篇，生命共 6 颗爱心。</li><li>学习模式每本书本轮完成四首诗，触发一次 Boss 战：刚学过的四首各随机抽两句，八句整体打乱。拼对八句获胜，独立六颗心，战败可重试；本场自动保存，战胜后继续学习。</li><li>诗途共有六个等级，每首次学完一整类诗文（一本）晋升一级，并获得晋级奖励弹窗。完成单篇或重复学习同一本不重复升级，第六级封顶。等级自动保存在当前浏览器。</li><li>挑战模式按「篇 → 章节」推进。目前开放第一篇·四季篇，含春、夏、秋、冬四章。</li><li>挑战模式点击「帮助」，第一次提示诗名和作者，第二次提示前半句，第三次提示后半句；答对进入下一题后重新计数。</li><li>「测试」板块只需拼出「床前明月光」即可晋升一级，每轮最多晋升一次，最高第六级。</li><li>每个自行选出的字造成 2 点伤害；每次帮助补正一个字，该字的 2 点伤害扣除。</li><li>点已选的字可撤回；重选保留帮助补字。拼错的位置标红，可重试。</li><li>每次出招填错扣 1 颗爱心。连续 3 句使用帮助，或本句帮助字数多于自行填写字数，也扣 1 颗爱心；同一句同时触发两条帮助规则只扣 1 颗。连续帮助每满 3 句重新计数，未使用帮助的正确句会中断连续计数。学习模式爱心耗尽则本轮结束；挑战模式恢复六颗心并从当前章开头重来。</li></ul><button class="primary-button dialog-close-action">知道了</button></dialog>
   <dialog id="resultDialog"><span class="dialog-symbol">✦</span><h2 id="resultTitle"></h2><p id="resultDescription"></p><button class="primary-button" id="playAgain">再走一程</button><button class="text-button return-button result-mode-button" id="resultModeButton">返回入口</button></dialog>
   <dialog id="rankRewardDialog" class="rank-reward" aria-labelledby="rewardTitle" aria-describedby="rewardBook rewardRank rewardMessage">
     <button id="closeRankReward" class="reward-close" type="button" aria-label="关闭晋级奖励">×</button>
@@ -89,7 +90,24 @@
     <p id="rewardFootnote" class="reward-footnote">每学完一本，诗途更进一步</p>
   </dialog>
   <script src="poems.js?v=474766f88c54"></script>
+  <dialog id="bossDialog" class="boss-dialog" aria-labelledby="bossTitle" aria-describedby="bossDescription">
+    <div class="boss-kicker"><span id="bossCheckpoint"></span><span class="boss-tag">BOSS</span></div>
+    <div class="boss-banner"><span aria-hidden="true">✦</span><h2 id="bossTitle">强敌来袭</h2><span aria-hidden="true">✦</span></div>
+    <div id="bossIntro"><div class="boss-portrait" aria-hidden="true"><span class="boss-halo"></span><i class="boss-horn horn-left"></i><i class="boss-horn horn-right"></i><span class="boss-face"><b id="bossSeal">魇</b></span><span class="boss-stamp">守<br>卷</span></div><p class="boss-name">墨魇 · 守卷妖</p></div>
+    <p id="bossDescription" class="boss-description"></p>
+    <section id="bossCombat" hidden aria-label="Boss 拼诗战斗">
+      <div class="boss-status"><span>墨障 <b id="bossHealthText">8 / 8</b></span><span id="bossProgress">0 / 8 句</span></div><div class="boss-health"><span id="bossHealthBar"></span></div>
+      <div class="boss-player"><span>你的爱心</span><span id="bossLives" class="boss-lives"></span></div>
+      <h3 id="bossQuestionTitle"></h3><p id="bossQuestionClue" class="boss-rule"></p>
+      <div id="bossSlots" class="boss-slots" role="group" aria-label="诗句答案，点击文字可撤回"></div>
+      <div id="bossBank" class="boss-bank" role="group" aria-label="待选诗字"></div>
+      <p id="bossFeedback" class="boss-feedback" role="status"></p><button id="bossSubmit" class="primary-button" type="button">以诗破阵 ↗</button>
+    </section>
+    <button id="bossStart" class="primary-button" type="button" autofocus>开始战斗 ↗</button><button id="bossContinue" class="primary-button" type="button" hidden>破阵成功，继续学习 ↗</button>
+    <button id="bossPause" class="text-button boss-pause" type="button">稍后再战</button><p class="boss-save-note">本场自动保存 · 八句诗，破八重墨障</p>
+  </dialog>
   <script src="curriculum.js?v=4fd71429c86d"></script>
-  <script src="game.js?v=16d6a4949d98"></script>
+  <script src="game.js?v=217a85f6dbb2"></script>
+  <script src="boss.js?v=cdf0bc26a980"></script>
 </body>
 </html>

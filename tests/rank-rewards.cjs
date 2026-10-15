@@ -72,6 +72,7 @@ const path = require('node:path');
       window.finishBook = category => {
         startGame('learning', category);
         while (true) {
+          if (state.boss) finishBossTest();
           if (state.poemComplete) {
             if (state.workIndex + 1 === learningWorks().length) break;
             nextLearningWork();
@@ -82,6 +83,89 @@ const path = require('node:path');
       startGame('learning', '唐诗');
       while (!state.poemComplete) solve();`);
     assert.equal(await ev("document.querySelector('.player-card h2').textContent"), '执笔小书生', 'One poem is not a whole book');
+    await ev(`window.fillBossTest = () => {
+      const boss = state.boss;
+      for (const char of [...normalize(boss.questions[boss.index].sentence)]) {
+        const tile = boss.tiles.findIndex((value, id) => value === char && !boss.selected.includes(id));
+        selectBossTile(tile);
+      }
+    };
+    window.finishBossTest = () => {
+      if (state.boss.status === 'intro' || state.boss.status === 'lost') startBossBattle();
+      while (state.boss.status === 'active') { fillBossTest(); submitBossAnswer(); }
+      if (state.boss.status === 'won') finishBossBattle();
+    };
+    while (state.completedWorks < 3) {
+      if (state.poemComplete) nextLearningWork();
+      solve();
+    }`);
+    assert.equal(await ev('Boolean(state.boss)'), false, 'Three poems do not trigger a Boss');
+    await ev('nextLearningWork(); while (!state.poemComplete) solve();');
+    assert.equal(await ev('state.boss?.status'), 'intro', 'The fourth completed poem triggers a Boss');
+    assert.equal(await ev("$('bossDialog').open"), true);
+    assert.equal(await ev('state.boss.questions.length'), 8);
+    assert.deepEqual(await ev('Object.values(state.boss.questions.reduce((out,q)=>(out[q.title]=(out[q.title]||0)+1,out),{}))'), [2,2,2,2]);
+    assert.equal(await ev('new Set(state.boss.questions.map(q => q.title + q.sentence)).size'), 8);
+    assert.equal(await ev('state.boss.questions.every(q => learningWorks().slice(0,4).some(w=>w.title===q.title && w.sentences.includes(q.sentence)))'), true);
+    for (const width of [1366, 320]) {
+      await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
+      await ev("Promise.all($('bossDialog').getAnimations().map(animation => animation.finished))");
+      assert(await ev("$('bossDialog').scrollWidth <= $('bossDialog').clientWidth"));
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      fs.writeFileSync(`.browser-check/boss-intro-${width}.png`, Buffer.from(shot.data, 'base64'));
+    }
+    await ev('startBossBattle(); fillBossTest(); submitBossAnswer(); submitBossAnswer();');
+    assert.equal(await ev('state.boss.index'), 1, 'Repeated submit cannot answer the next question');
+    assert(await ev("$('bossQuestionClue').textContent.startsWith('原诗第 ')"));
+    assert.equal(await ev('state.completedWorks'), 4, 'Boss review is not another learned poem');
+    for (const width of [1366, 320]) {
+      await send('Emulation.setDeviceMetricsOverride', {width, height:844, deviceScaleFactor:1, mobile:false});
+      assert(await ev("$('bossDialog').scrollWidth <= $('bossDialog').clientWidth"));
+      const shot = await send('Page.captureScreenshot', {format:'png'});
+      fs.writeFileSync(`.browser-check/boss-combat-${width}.png`, Buffer.from(shot.data, 'base64'));
+    }
+    await ev('selectBossTile(0); saveLearningProgress()');
+    const savedBoss = await ev('JSON.stringify(state.boss)');
+    const helpers = await ev('Object.fromEntries(["solve","finishBook","fillBossTest","finishBossTest"].map(name=>[name,window[name].toString()]))');
+    await load();
+    await ev(Object.entries(helpers).map(([name,body]) => `window.${name}=${body};`).join('\n'));
+    await ev(`window.originalTimeout = window.setTimeout;
+      window.setTimeout = (fn, ms, ...args) => ms === 850 ? (fn(...args), 0) : originalTimeout(fn, ms, ...args);
+      startGame('learning', '唐诗');`);
+    assert.equal(await ev('JSON.stringify(state.boss)'), savedBoss, 'Boss answer, lives, and order restore');
+    await ev(`state.boss.selected.fill(null);
+      window.wrongBossTest = () => {
+        state.boss.selected.fill(null);
+        const answer = normalize(state.boss.questions[state.boss.index].sentence);
+        const wrong = state.boss.tiles.findIndex(char => char !== answer[0]);
+        selectBossTile(wrong);
+        while (state.boss.selected.includes(null)) selectBossTile(state.boss.tiles.findIndex((_, id) => !state.boss.selected.includes(id)));
+        submitBossAnswer();
+      };
+      for (let i=0; i<6; i++) wrongBossTest();`);
+    assert.equal(await ev('state.boss.status'), 'lost');
+    assert.equal(await ev('state.completedWorks'), 4);
+    await ev('startBossBattle()');
+    assert.equal(await ev('state.boss.hp'), 6);
+    assert.equal(await ev('state.boss.index'), 0);
+    await ev('while (state.boss.status === "active") { fillBossTest(); submitBossAnswer(); }');
+    assert.equal(await ev('state.boss.status'), 'won');
+    assert.equal(await ev('state.boss.index'), 8);
+    const winShot = await send('Page.captureScreenshot', {format:'png'});
+    fs.writeFileSync('.browser-check/boss-victory-320.png', Buffer.from(winShot.data, 'base64'));
+    await ev('finishBossBattle()');
+    assert.equal(await ev('state.boss'), null);
+    await ev('nextLearningWork()');
+    assert.equal(await ev('state.workIndex'), 4);
+    assert.equal(await ev('state.learningPreview'), true);
+    await ev('while (state.completedWorks < 8) { if (state.poemComplete) nextLearningWork(); solve(); }');
+    assert.equal(await ev('state.boss.checkpoint'), 8, 'Every fourth poem triggers another Boss');
+    assert.equal(await ev('state.boss.questions.every(q => learningWorks().slice(4,8).some(w=>w.title===q.title && w.sentences.includes(q.sentence)))'), true);
+    await ev(`const brokenSave = JSON.parse(localStorage.getItem(learningSaveKey(state.category)));
+      brokenSave.boss.tiles = null; localStorage.setItem(learningSaveKey(state.category), JSON.stringify(brokenSave)); startGame('learning', '唐诗');`);
+    assert.equal(await ev('state.boss.status'), 'intro', 'Invalid Boss saves regenerate the due encounter safely');
+    assert.equal(await ev('state.completedWorks'), 8);
+    await ev('finishBossTest()');
     await ev("finishBook('汉赋')");
     assert.equal(await ev("document.querySelector('.player-card h2').textContent"), '略通诗中韵', 'A whole book promotes the player');
     assert.equal(await ev("$('rankRewardDialog').open"), true);
@@ -103,7 +187,12 @@ const path = require('node:path');
     assert.equal(await ev("$('playerRank').textContent"), '略通诗中韵');
     const cases = [['诗经','能诗亦善对'], ['楚辞','出口便成诗'], ['宋词','诗才已出众'], ['元曲','诗中之俊杰']];
     for (const [category, rank] of cases) {
-      await ev(`finishBook(${JSON.stringify(category)})`);
+      if (category === '元曲') {
+        await ev("startGame('learning', '元曲'); while (state.completedWorks < 4) { if (state.poemComplete) nextLearningWork(); solve(); }");
+        assert.equal(await ev('completedBooks.has("元曲")'), false, 'Final-book rank waits for the Boss');
+        assert.equal(await ev("$('rankRewardDialog').open"), false);
+        await ev('finishBossTest()');
+      } else await ev(`finishBook(${JSON.stringify(category)})`);
       assert.equal(await ev("$('playerRank').textContent"), rank);
       assert.equal(await ev("$('rankRewardDialog').open"), true);
       await ev("$('continueLearning').click()");
@@ -181,6 +270,6 @@ const path = require('node:path');
     await load(); await ev('startGame("test")');
     assert.equal(await ev('playerRankIndex()'), 5, 'Test rank survives reload');
     assert.deepEqual(errors, []);
-    console.log('PASS: book/test promotions, full-poem preview and saved phases, three-step challenge help, inline attribution, persistence, legacy saves, caps, modal focus, responsive layouts, reduced motion, no browser errors.');
+    console.log('PASS: Boss checkpoints 4/8, eight unique two-per-poem questions, reload resume, wrong answers/retry/victory, book/test ranks, previews, hints, inline attribution, responsive UI, no browser errors.');
   } finally { ws.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
