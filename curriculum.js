@@ -10,11 +10,22 @@ const LEARNING_CATEGORIES = [
 
 // Add future volumes here; poem titles select each chapter's question pool.
 const CHALLENGE_VOLUMES = [{
-  id:'four-seasons', title:'第一篇 · 四季篇', description:'从春风到冬雪，循着诗句走过一年。',
+  id:'four-seasons', name:'四季', title:'第一篇 四季', description:'从春风到冬雪，循着诗句走过一年。',
   chapters:[
     {chapter:'第一章 · 春', season:'春', name:'春芽小妖', description:'春风翻开诗页，唤醒一山新绿。', hp:24, color:'#8d9980', speech:'春风到了，拼一句春天的诗吧！', titles:['春晓','春夜喜雨','咏柳','绝句·迟日江山丽'], opening:'春眠不觉晓'},
     {chapter:'第二章 · 夏', season:'夏', name:'荷风小妖', description:'荷叶田田，诗意藏在夏日水边。', hp:32, color:'#85a6a0', speech:'听见荷风了吗？这次写夏天！', titles:['小池','晓出净慈寺送林子方','池上','子夜吴歌·夏歌'], opening:'小荷才露尖尖角'},
     {chapter:'第三章 · 秋', season:'秋', name:'枫影小妖', description:'层林尽染，拾起一片秋日诗意。', hp:40, color:'#ba9a7b', speech:'秋风翻书页，下一句是什么？', titles:['山行','山居秋暝','天净沙·秋思','天净沙·秋','九月九日忆山东兄弟'], opening:'停车坐爱枫林晚'},
     {chapter:'第四章 · 冬', season:'冬', name:'雪墨小妖', description:'一炉微火，一场冬雪，等你以诗收卷。', hp:48, color:'#9ca9b9', speech:'最后一场雪，等你拼出冬日诗！', titles:['江雪','逢雪宿芙蓉山主人','问刘十九'], opening:'独钓寒江雪'}
   ]
-}];
+}, ...CHALLENGE_FESTIVALS_WEATHER, ...CHALLENGE_PLANTS_ANIMALS, ...CHALLENGE_INSTRUMENTS_VIRTUES].map((volume, volumeIndex) => ({
+  ...volume,
+  title:`第${['一','二','三','四','五','六','七'][volumeIndex]}篇 ${volume.name}`,
+  chapters:volume.chapters.map((chapter,index) => {
+    if (!chapter.verses) return chapter;
+    const availableDamage = chapter.verses.reduce((total,verse) => total + [...verse.sentence].filter(char => /\p{Script=Han}/u.test(char)).length * 2, 0);
+    return {...chapter, chapter:`第${['一','二','三','四','五','六','七','八','九','十'][index]}章 · ${chapter.topic}`,
+      season:chapter.topic, name:`${chapter.topic}墨灵`, hp:Math.min(24 + index % 4 * 8, availableDamage),
+      color:['#8d9980','#85a6a0','#ba9a7b','#9ca9b9'][index % 4],
+      speech:`写一句关于「${chapter.topic}」的诗，别忘了诗名和作者。`};
+  })
+}));

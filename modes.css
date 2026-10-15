@@ -22,13 +22,13 @@
 .volume-seal { font: 28px var(--serif); writing-mode: vertical-rl; letter-spacing: 8px; border: 1px solid #b0b59a; border-radius: 25px 25px 8px 8px; background: #edf0df; color: #7f8b67; padding: 18px 12px 10px; }
 .volume-heading h2 { font: 600 26px var(--serif); margin: 8px 0 10px; }
 .volume-heading p, .chapter-card p { color: #968c76; font-size: 12px; line-height: 1.8; }
-.challenge-volume-card { display: flex; align-items: center; gap: 24px; width: 100%; padding: 12px; text-align: left; color: inherit; background: transparent; border: 1px solid transparent; border-radius: 12px; }
-.challenge-volume-card:hover { background: #f5f2e5; border-color: #dad2bb; }
-.challenge-volume-card:focus-visible { outline: 2px solid #89916f; outline-offset: 4px; }
+#challengeVolumeList { display: grid; gap: 12px; }
+.challenge-volume-card { display: flex; align-items: center; gap: 24px; width: 100%; padding: 16px; text-align: left; color: inherit; background: #faf7ec; border: 1px solid #e4ddc9; border-radius: 12px; }
 .challenge-volume-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 12px; }
-.challenge-volume-copy strong { font: 600 26px/1.4 var(--serif); }
-.challenge-volume-copy > span:last-child { font: 13px/1.8 var(--serif); color: #968c76; }
-.challenge-volume-arrow { flex-shrink: 0; color: #89916f; font-size: 24px; }
+.challenge-volume-copy h2 { margin: 0; font: 600 24px/1.4 var(--serif); }
+.challenge-volume-copy p { margin: 0; font: 13px/1.8 var(--serif); color: #968c76; }
+.volume-enter { flex-shrink: 0; min-height: 44px; }
+.stage-progress { flex-wrap: wrap; row-gap: 6px; }
 .chapter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 160px)); justify-content: center; gap: 12px; width: 100%; max-width: 676px; margin-inline: auto; padding: 6px 0 12px; }
 .chapter-card { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 20px; min-width: 0; height: 330px; padding: 34px 18px; border: 1px solid #d8cbb0; border-radius: 7px 7px 12px 12px; background: linear-gradient(90deg, #c6b58b18, transparent 12%, #fffdf433 48%, transparent 88%, #c6b58b18), repeating-linear-gradient(90deg, transparent 0 25px, #b09b6b0a 25px 26px), #f5efdd; box-shadow: inset 3px 0 0 #fffdf44d, inset -3px 0 0 #c6b58b14, 0 5px 0 #c8b8912b; }
 .chapter-card h3 { flex-shrink: 0; writing-mode: vertical-rl; text-orientation: upright; font: 600 22px/1.4 var(--serif); letter-spacing: 5px; margin: 0; color: var(--category-color); }
@@ -74,9 +74,11 @@
   .category-card > span:not(.category-mark) { font-size: 10px; }
   .volume-heading { gap: 12px; }
   .volume-heading h2 { font-size: 22px; }
-  .challenge-volume-card { gap: 12px; padding: 8px 0; }
-  .challenge-volume-copy strong { font-size: 21px; }
-  .challenge-volume-copy > span:last-child { font-size: 12px; }
+  .challenge-volume-card { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; padding: 14px 12px; }
+  .challenge-volume-card .volume-seal { grid-row: span 2; }
+  .challenge-volume-copy h2 { font-size: 20px; }
+  .challenge-volume-copy p { font-size: 12px; }
+  .volume-enter { grid-column: 2; justify-self: start; padding: 10px 18px; }
   .volume-heading p { font-size: 11px; }
   .volume-bottom { flex-direction: column; align-items: stretch; }
   .volume-bottom p { text-align: center; }

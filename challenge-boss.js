@@ -8,15 +8,13 @@ function challengeVerseKind(sentence) {
 }
 
 function challengeBossPool(kind) {
-  return LEARNING_WORKS.flatMap(work => work.sentences
-    .filter(sentence => challengeVerseKind(sentence) === kind)
-    .map(sentence => ({title:work.title, author:work.author, sentence})));
+  return allChallengeEntries().filter(entry => challengeVerseKind(entry.sentence) === kind);
 }
 
 function advanceChallengeRound() {
   if (!state.enemyHp) {
     state.defeated++;
-    state.stage = (state.stage + 1) % VOLUME.chapters.length;
+    state.stage = (state.stage + 1) % currentChallengeVolume().chapters.length;
     state.enemyHp = currentStage().hp;
     prepareDeck();
     feedback(`进入${currentStage().chapter}，请按新的主题作答。`, 'success');
@@ -72,7 +70,7 @@ function submitChallengeBoss() {
   if (![verse,title,author].every(value => value.trim())) {
     $('challengeBossFeedback').textContent = '请填写完整诗句、诗名和作者。'; return;
   }
-  const work = matchChallenge(verse, title, author, {titles:LEARNING_WORKS.map(work => work.title)});
+  const work = matchChallenge(verse, title, author, {verses:allChallengeEntries()});
   const sentence = work?.sentences.find(line => cleanSubmission(line) === cleanSubmission(verse)
     || (work.title === '山行' && cleanSubmission(line).replace('白云生处', '白云深处') === cleanSubmission(verse)));
   if (!sentence || challengeVerseKind(sentence) !== boss.kind) {
@@ -113,9 +111,10 @@ function renderChallengeBoss() {
   const active = boss.status === 'active', won = boss.status === 'won', lost = boss.status === 'lost';
   $('challengeBossDialog').dataset.phase = boss.status;
   $('challengeBossCheckpoint').textContent = `第 ${boss.checkpoint} 句 · 第 ${state.challengeBossWins + 1} / 4 场`;
+  $('challengeBossName').textContent = `墨魇 · ${currentChallengeVolume().name}试炼`;
   $('challengeBossTitle').textContent = won ? `${boss.kind} · 破阵成功` : lost ? '胜负未定，再试一回' : `${boss.kind} · 强敌来袭`;
   $('challengeBossDescription').textContent = won ? '三句成诗，三重墨障尽破。' : lost ? '本场重新开始，恢复六颗心；普通关卡的十句进度保留。'
-    : `不限定季节，写出三句不同的${boss.kind}诗文，并填写诗名与作者，即可击败本场 Boss。`;
+    : `不限定主题，写出三句不同的${boss.kind}诗文，并填写诗名与作者，即可击败本场 Boss。`;
   $('challengeBossIntro').hidden = active;
   $('challengeBossCombat').hidden = !active;
   $('challengeBossStart').hidden = won || active;

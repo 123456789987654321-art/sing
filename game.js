@@ -20,7 +20,7 @@ const QUESTIONS = POEMS.flatMap(poem => {
   });
 });
 const DISTRACTORS = [...new Set(POEMS.flatMap(poem => [...normalize(poem[3])]))];
-const VOLUME = CHALLENGE_VOLUMES[0];
+let selectedVolumeId = CHALLENGE_VOLUMES[0].id;
 let selectedMode = 'learning';
 let state, sound = true, audioContext, audioOutput, transitionTimer;
 try { sound = localStorage.getItem('poetry-sound-enabled-v1') !== 'false'; }
@@ -173,8 +173,23 @@ function restoreLearningProgress() {
   } catch { /* Ignore unavailable or outdated saves and start a fresh round. */ }
 }
 
+function currentChallengeVolume() {
+  return CHALLENGE_VOLUMES.find(volume => volume.id === (state?.mode === 'challenge' ? state.volumeId : selectedVolumeId)) || CHALLENGE_VOLUMES[0];
+}
+
+function challengeEntries(stage = currentStage()) {
+  return stage.verses || LEARNING_WORKS.filter(work => stage.titles.includes(work.title))
+    .flatMap(work => work.sentences.map(sentence => ({title:work.title, author:work.author, sentence})));
+}
+
+function allChallengeEntries() {
+  const entries = [...challengeEntries({titles:LEARNING_WORKS.map(work => work.title)}),
+    ...CHALLENGE_VOLUMES.flatMap(volume => volume.chapters.flatMap(chapter => chapter.verses || []))];
+  return [...new Map(entries.map(entry => [`${entry.title}:${entry.author}:${normalize(entry.sentence)}`, entry])).values()];
+}
+
 function currentStage() {
-  if (state.mode === 'challenge') return VOLUME.chapters[state.stage];
+  if (state.mode === 'challenge') return currentChallengeVolume().chapters[state.stage];
   if (state.mode === 'test') return {chapter:'一句诗，升一级', name:'试诗小妖', description:'拼出床前明月光，领取晋级奖励。', hp:10, color:'#9b91ab', speech:'床前明月光，五个字就能晋级！'};
   const category = LEARNING_CATEGORIES.find(item => item.name === state.category);
   return {chapter:category.name, name:'伴读小妖', description:category.note,
@@ -182,8 +197,9 @@ function currentStage() {
 }
 
 function questionPool() {
-  return QUESTIONS.filter(question => state.mode === 'learning'
-    ? question.category === state.category : currentStage().titles.includes(question.title));
+  if (state.mode === 'challenge') return challengeEntries().map(entry => ({...entry,
+    answer:normalize(entry.sentence.split(/[，,；;]/u)[0]), source:`${entry.author} · ${entry.title}`}));
+  return QUESTIONS.filter(question => question.category === state.category);
 }
 
 function prepareDeck() {
@@ -211,10 +227,8 @@ function newPuzzle() {
   if (state.mode === 'challenge') {
     $('challengeForm').reset();
     state.challengeHintStep = 0;
-    const works = LEARNING_WORKS.filter(work => currentStage().titles.includes(work.title));
-    const preferred = works.find(work => work.title === state.question.title);
-    state.challengeHint = [preferred, ...works.filter(work => work !== preferred)].filter(Boolean)
-      .flatMap(work => work.sentences.map(sentence => ({sentence, title:work.title, author:work.author})))
+    const entries = challengeEntries();
+    state.challengeHint = [...entries.filter(entry => entry.title === state.question.title), ...entries.filter(entry => entry.title !== state.question.title)]
       .find(item => !state.usedVerses.includes(`${item.title}:${normalize(item.sentence)}`));
   }
   const answer = [...state.question.answer];
@@ -238,7 +252,15 @@ function chooseMode(mode) {
   $('challengePanel').hidden = mode !== 'challenge';
 }
 
-function openChallengeVolume() {
+function openChallengeVolume(volumeId = selectedVolumeId) {
+  const volume = CHALLENGE_VOLUMES.find(item => item.id === volumeId);
+  if (!volume) return;
+  selectedVolumeId = volume.id;
+  $('volumeSeal').textContent = volume.name;
+  $('volumeTitle').textContent = volume.title;
+  $('volumeDescription').textContent = volume.description;
+  $('chapterPreview').innerHTML = volume.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
+  $('chapterPreview').setAttribute('aria-label', `${volume.name}篇目录`);
   $('challengeVolumeList').hidden = true;
   $('challengeVolumeDetails').hidden = false;
   $('entryBack').textContent = '← 返回章节';
@@ -261,9 +283,9 @@ function showModeSelection() {
   window.scrollTo(0, 0);
 }
 
-function startGame(mode, category = '唐诗') {
+function startGame(mode, category = '唐诗', volumeId = selectedVolumeId) {
   selectedMode = mode;
-  state = {mode, category};
+  state = {mode, category, volumeId};
   $('entryScreen').hidden = true;
   $('modeSelection').hidden = true;
   $('gameScreen').hidden = false;
@@ -280,7 +302,7 @@ function resetGame() {
   $('bossDialog').close();
   $('challengeBossDialog').close();
   $('rankRewardDialog').close();
-  state = {mode:state?.mode || 'learning', category:state?.category || '唐诗',
+  state = {mode:state?.mode || 'learning', category:state?.category || '唐诗', volumeId:state?.volumeId || selectedVolumeId,
     workOrder:null, workIndex:0, sentenceIndex:0, confirmedSentences:0, readPoems:{}, helpStreak:0, completedWorks:0, poemComplete:false, boss:null, bossClearedAt:0, stage:0, hp:6, enemyHp:24, score:0, defeated:0, solved:0, busy:false, over:false, deck:[]};
   state.enemyHp = currentStage().hp;
   state.challengeCorrect = 0;
@@ -308,12 +330,19 @@ function renderModeSelection() {
     button.addEventListener('click', () => startGame('learning', category.name));
     $('categoryGrid').append(button);
   });
-  $('volumeTitle').textContent = '第一章 · 四季';
-  $('challengeVolumeSummary').textContent = VOLUME.description;
-  $('volumeDescription').textContent = VOLUME.description;
-  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
+  $('challengeVolumeList').replaceChildren();
+  CHALLENGE_VOLUMES.forEach(volume => {
+    const row = document.createElement('article');
+    row.className = 'challenge-volume-card';
+    row.innerHTML = `<span class="volume-seal" aria-hidden="true">${volume.name}</span><div class="challenge-volume-copy"><h2>${volume.title}</h2><p>${volume.description}</p></div>`;
+    const enter = document.createElement('button');
+    enter.type = 'button'; enter.className = 'primary-button volume-enter'; enter.textContent = '进入';
+    enter.dataset.challengeVolume = volume.id;
+    enter.setAttribute('aria-label', `进入${volume.title}`);
+    enter.addEventListener('click', () => openChallengeVolume(volume.id));
+    row.append(enter); $('challengeVolumeList').append(row);
+  });
   $('chapterPreview').setAttribute('role', 'list');
-  $('chapterPreview').setAttribute('aria-label', '四季篇目录');
   chooseMode(selectedMode);
 }
 
@@ -335,10 +364,10 @@ function render() {
   $('saveLearning').hidden = !learning;
   $('saveLearning').disabled = state.busy || state.over;
   $('resetButton').textContent = learning ? '↻ 新一轮' : '↻ 重来';
-  $('volumeLabel').textContent = state.mode === 'test' ? '测试' : learning ? '学习模式' : VOLUME.title;
+  $('volumeLabel').textContent = state.mode === 'test' ? '测试' : learning ? '学习模式' : currentChallengeVolume().title;
   $('enemyHealthLabel').textContent = learning ? '练习' : '妖气';
   $('chapter').textContent = stage.chapter;
-  $('enemyName').innerHTML = `${stage.name} <span>${state.mode === 'test' ? '试' : learning ? '学' : ['壹','贰','叁','肆'][state.stage]}</span>`;
+  $('enemyName').innerHTML = `${stage.name} <span>${state.mode === 'test' ? '试' : learning ? '学' : ['壹','贰','叁','肆','伍','陆','柒','捌','玖','拾'][state.stage]}</span>`;
   $('enemyDescription').textContent = stage.description;
   $('enemyHpText').textContent = `${state.enemyHp} / ${stage.hp}`;
   $('enemyHpBar').style.width = `${state.enemyHp / stage.hp * 100}%`;
@@ -349,7 +378,7 @@ function render() {
   $('defeated').textContent = state.defeated;
   $('monster').style.setProperty('--monster', stage.color);
   $('stageProgress').hidden = state.mode !== 'challenge';
-  $('stageProgress').innerHTML = VOLUME.chapters.map((_,i) => `${i ? '<span class="stage-line"></span>' : ''}<span class="stage-node ${i === state.stage ? 'current' : i < state.stage ? 'completed' : ''}">${i < state.stage ? '✓' : i + 1}</span>`).join('');
+  $('stageProgress').innerHTML = currentChallengeVolume().chapters.map((chapter,i) => `${i ? '<span class="stage-line"></span>' : ''}<span title="${chapter.chapter}" class="stage-node ${i === state.stage ? 'current' : i < state.stage ? 'completed' : ''}">${i < state.stage ? '✓' : i + 1}</span>`).join('');
   $('comboText').textContent = learning ? `已学完 ${state.completedWorks} 篇 · 已拼对 ${state.solved} 句` : state.solved ? `已成诗 ${state.solved} 句` : '点选文字，拼出第一句诗';
   renderLearning();
   renderReading();
@@ -685,7 +714,7 @@ function attack() {
     if (state.enemyHp === 0) {
       state.defeated++;
       if (state.mode === 'challenge') {
-        if (state.stage === VOLUME.chapters.length - 1) { finish(true); return; }
+        if (state.stage === currentChallengeVolume().chapters.length - 1) { finish(true); return; }
         state.stage++;
         prepareDeck();
         feedback('✦ 小妖已降服，进入' + currentStage().chapter + '！', 'success');
@@ -705,14 +734,10 @@ function attack() {
 const cleanSubmission = text => text.trim().replace(/[\s\p{P}]/gu, '');
 function matchChallenge(verse, title, author, stage = currentStage()) {
   const text = cleanSubmission(verse);
-  return LEARNING_WORKS.find(work => stage.titles.includes(work.title)
-    && cleanSubmission(work.title) === cleanSubmission(title)
-    && cleanSubmission(work.author) === cleanSubmission(author)
-    && work.sentences.some(sentence => {
-      const canonical = cleanSubmission(sentence);
-      return canonical === text || (work.title === '山行'
-        && canonical.replace('白云生处', '白云深处') === text);
-    }));
+  const entry = challengeEntries(stage).find(item => [item.title, ...(item.titleAliases || [])].some(name => cleanSubmission(name) === cleanSubmission(title))
+    && cleanSubmission(item.author) === cleanSubmission(author)
+    && (cleanSubmission(item.sentence) === text || (item.title === '山行' && cleanSubmission(item.sentence).replace('白云生处', '白云深处') === text)));
+  return entry && {...entry, sentences:[entry.sentence]};
 }
 function restartChapter() {
   clearTimeout(transitionTimer);
@@ -773,7 +798,7 @@ function finish(won) {
   render();
   $('resultTitle').textContent = won ? '诗出有名，名满诗圈！' : '爱心用完了，再来一轮吧';
   $('resultDescription').textContent = `你拼对了 ${state.solved} 句诗，降服 ${state.defeated} 只小妖，造成 ${state.score} 点伤害。${won ? '四季篇四章已过，每一个字都有力量。' : '填错、连续三句使用帮助或帮助字数过半会扣爱心。重新开始可恢复 6 颗爱心。'}`;
-  if (won && state.mode === 'challenge') $('resultDescription').textContent = `你答对了 ${state.challengeCorrect} 句四季诗文，并以每场三句击败五言、七言、四言、杂言四位 Boss。四季试炼已完成！`;
+  if (won && state.mode === 'challenge') $('resultDescription').textContent = `你答对了 ${state.challengeCorrect} 句${currentChallengeVolume().name}诗文，并以每场三句击败五言、七言、四言、杂言四位 Boss。${currentChallengeVolume().name}试炼已完成！`;
   $('resultDialog').showModal();
 }
 
@@ -860,11 +885,10 @@ document.querySelectorAll('[data-entry-mode]').forEach(button => {
     window.scrollTo(0, 0);
   });
 });
-$('openChallengeVolume').addEventListener('click', openChallengeVolume);
 $('entryBack').addEventListener('click', () => {
   if (selectedMode === 'challenge' && !$('challengeVolumeDetails').hidden) {
     chooseMode('challenge');
-    $('openChallengeVolume').focus({preventScroll:true});
+    document.querySelector(`[data-challenge-volume="${selectedVolumeId}"]`).focus({preventScroll:true});
     window.scrollTo(0, 0);
   } else showModeSelection();
 });
