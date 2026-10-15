@@ -110,9 +110,6 @@
 .entry-challenge { background: #fcf5e7; border-color: #c8b898; box-shadow: 0 4px 0 #c8b89850; }
 .entry-challenge .entry-icon { background: #f1e6ce; border-color: #cfbd96; color: #a08860; }
 .entry-challenge b { color: #a08860; }
-.entry-test { background: #f5f0f5; border-color: #bfb0c3; box-shadow: 0 4px 0 #bfb0c350; }
-.entry-test .entry-icon { background: #eae1ed; border-color: #c6b7cc; color: #88728f; }
-.entry-test b { color: #88728f; }
 .entry-note { font: 11px var(--serif); letter-spacing: 2px; color: #a1977e; margin: 22px 0 0; }
 .entry-decoration { position: absolute; width: 590px; height: 590px; border-radius: 50%; border: 1px solid #b5b99b35; background: radial-gradient(circle, #f9f5e450, #e1e4c420 65%, transparent 66%); pointer-events: none; }
 .entry-decoration::before, .entry-decoration::after { content: ''; position: absolute; border: 1px solid #bdc1a42b; border-radius: 50%; inset: 32px; }
@@ -191,6 +188,14 @@
 .puzzle-stats { display: flex; gap: 18px; margin: 0 0 8px; color: #998f79; font-size: 10px; }
 .puzzle-stats b { font-weight: 500; color: #808967; }
 .reading-card { padding: 24px 20px; min-height: 180px; }
+.challenge-tip { padding: 20px; }
+.challenge-tip h2 { margin: 0 0 12px; font: 600 18px var(--serif); color: #78825f; }
+.challenge-tip p { margin: 0; font: 14px/1.9 var(--serif); color: #82765f; }
+.challenge-game .right-column { display: grid; gap: 20px; }
+.challenge-boss-inline { min-width: 0; }
+.boss-inline-description { margin: 12px 0; font: 15px/1.9 var(--serif); }
+.challenge-boss-inline .boss-feedback:empty { display: none; }
+.challenge-boss-inline .boss-feedback { margin: 12px 0; }
 .reading-card h2 { margin: 0 0 10px; text-align: center; font: 600 21px/1.6 var(--serif); }
 .reading-card > p { margin: 0; text-align: center; font-size: 12px; color: #9a8f78; }
 .reading-text { white-space: pre-line; font: 16px/2.2 var(--serif); color: #79785d; max-height: 430px; overflow-y: auto; overflow-wrap: anywhere; margin-top: 20px; }

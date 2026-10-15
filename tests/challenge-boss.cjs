@@ -57,13 +57,18 @@ const path = require('node:path');
     for (const [index,kind] of ['五言','七言','四言','杂言'].entries()) {
       assert.equal(await ev('state.challengeCorrect'),(index+1)*10);
       assert.equal(await ev('state.challengeBoss.kind'),kind);
-      assert.equal(await ev("$('challengeBossDialog').open"),true);
-      await ev("$('challengeBossPause').click(); normalAnswer()");
-      assert.equal(await ev('state.challengeCorrect'),(index+1)*10,'Closing the Boss cannot bypass it');
-      await ev("$('challengeBossResume').click(); $('challengeBossStart').click()");
+      assert.equal(await ev("document.querySelector('dialog[open]')"),null,'Boss stays in the normal battle page');
+      assert.equal(await ev("$('challengeBossPanel').hidden"),false);
+      assert.equal(await ev('state.challengeBoss.status'),'active','Boss combat starts directly');
+      assert.equal(await ev("$('challengeForm').hidden"),true);
+      assert.equal(await ev("$('enemyHpText').textContent"),'3 / 3');
+      assert.equal(await ev("$('challengeTip').hidden"),false);
+      assert.equal(await ev("$('challengeTipText').textContent.includes(state.challengeBoss.kind)"),true);
+      await ev('normalAnswer()');
+      assert.equal(await ev('state.challengeCorrect'),(index+1)*10,'Normal attacks cannot bypass the Boss');
       await ev("for(let i=0;i<3;i++) $('challengeBossHintButton').click()");
       assert.equal(await ev('state.challengeBoss.hintStep'),3);
-      assert.equal(await ev("$('challengeBossHintButton').disabled"),true);
+      assert.equal(await ev("$('challengeBossHintButton').textContent"),'✧ 换一句');
       assert.equal(await ev("$('challengeBossVerse').value"),await ev('state.challengeBoss.hint.sentence'));
       assert.equal(await ev("$('challengeBossTitleInput').value"),await ev('state.challengeBoss.hint.title'));
       assert.equal(await ev("$('challengeBossAuthor').value"),await ev('state.challengeBoss.hint.author'));
@@ -87,7 +92,7 @@ const path = require('node:path');
         for(const width of [1366,320]) {
           await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:false});
           assert(await ev('document.documentElement.scrollWidth<=innerWidth'));
-          assert(await ev("$('challengeBossDialog').scrollWidth <= $('challengeBossDialog').clientWidth"));
+          assert(await ev("$('challengeBossPanel').scrollWidth <= $('challengeBossPanel').clientWidth"));
           const shot=await send('Page.captureScreenshot',{format:'png'});
           fs.writeFileSync(`.browser-check/challenge-boss-${width}.png`,Buffer.from(shot.data,'base64'));
         }
@@ -111,11 +116,11 @@ const path = require('node:path');
     assert.equal(await ev('state.challengeBossWins'),0);
     assert.equal(await ev('!!state.challengeBoss'),false);
     await ev('for(let i=0;i<10;i++) normalAnswer(); showModeSelection()');
-    assert.equal(await ev("$('challengeBossDialog').open"),false);
+    assert.equal(await ev("document.querySelector('dialog[open]')"),null);
     assert.equal(await ev('attackEffects.size'),0,'Leaving the mode removes attack effects');
     await ev("startGame('learning','唐诗')");
     assert.equal(await ev('!!state.challengeBoss'),false,'Challenge boss does not leak into learning');
     assert.deepEqual(errors,[]);
-    console.log('PASS: normal 10/20/30/40 checkpoints, four verse forms, three-answer wins, wrong/repeated answers, retry, pause gating, responsive Boss, final victory and reset.');
+    console.log('PASS: inline Boss at 10/20/30/40, shared scene and health, four verse forms, three-answer wins, wrong/repeated answers, retry, no bypass, responsive layout, final victory and reset.');
   } finally { ws.close(); }
 })().catch(err => {console.error(err);process.exitCode=1;});

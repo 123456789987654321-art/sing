@@ -13,7 +13,8 @@ const expected=[['四季','春 夏 秋 冬'],['节日','春节 元宵 端午 中
   assert(loaded,'Game loads');
   assert.equal(await ev('CHALLENGE_VOLUMES.length'),7,'All seven challenge volumes exist');
   assert.deepEqual(await ev('CHALLENGE_VOLUMES.map(v=>[v.name,v.chapters.map(c=>c.season).join(" ")])'),expected);
-  assert.equal(await ev('LEARNING_WORKS.length'),47,'Challenge-only data does not alter learning books');
+  assert.equal(await ev('LEARNING_WORKS.length'),300,'Each learning category has fifty complete works');
+  assert.equal(await ev("!!matchChallenge('小荷才露尖尖角，早有蜻蜓立上头。','小池','杨万里',CHALLENGE_VOLUMES[0].chapters[1])"),true,'Original Song poems remain available in summer challenges');
   for(const title of ['池上','池上二绝·其二'])assert.equal(await ev(`!!matchChallenge('小娃撑小艇，偷采白莲回。',${JSON.stringify(title)},'白居易',CHALLENGE_VOLUMES.find(v=>v.id==='plants').chapters.find(c=>c.season==='荷'))`),true,'Known titles for the same learned poem remain valid');
   await ev(`sound=false;window.realTimeout=setTimeout;window.setTimeout=(fn,ms,...args)=>ms===850?(fn(...args),0):realTimeout(fn,ms,...args);
     window.answerNext=()=>{

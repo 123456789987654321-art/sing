@@ -31,22 +31,22 @@ function queueChallengeBoss() {
   state.challengeBoss = {kind:CHALLENGE_BOSS_KINDS[state.challengeBossWins], checkpoint:state.challengeCorrect,
     status:'intro', hp:6, index:0, used:[], hintStep:0};
   $('challengeBossFeedback').textContent = '';
-  render();
-  openChallengeBoss();
+  startChallengeBoss();
 }
 
 function openChallengeBoss() {
   if (!state.challengeBoss || state.mode !== 'challenge') return;
-  renderChallengeBoss();
-  if (!$('challengeBossDialog').open) $('challengeBossDialog').showModal();
+  render();
   const status = state.challengeBoss.status;
   $(status === 'active' ? 'challengeBossVerse' : status === 'won' ? 'challengeBossContinue' : 'challengeBossStart').focus({preventScroll:true});
 }
 
-function nextChallengeBossHint() {
+function nextChallengeBossHint(change = false) {
   const boss = state.challengeBoss;
   boss.hintStep = 0;
-  boss.hint = challengeBossPool(boss.kind).find(item => !boss.used.includes(normalize(item.sentence)));
+  const available = challengeBossPool(boss.kind).filter(item => !boss.used.includes(normalize(item.sentence)));
+  const alternatives = available.filter(item => normalize(item.sentence) !== normalize(boss.hint?.sentence || ''));
+  boss.hint = shuffled(change && alternatives.length ? alternatives : available)[0];
   $('challengeBossForm').reset();
 }
 
@@ -57,27 +57,32 @@ function startChallengeBoss() {
   Object.assign(boss, {status:'active', hp:6, index:0, used:[]});
   nextChallengeBossHint();
   $('challengeBossFeedback').textContent = '';
-  renderChallengeBoss();
+  render();
   $('challengeBossVerse').focus({preventScroll:true});
 }
 
-function submitChallengeBoss() {
+async function submitChallengeBoss() {
   const boss = state.challengeBoss;
-  if (!boss || boss.status !== 'active') return;
+  if (!boss || boss.status !== 'active' || state.busy) return;
   const verse = $('challengeBossVerse').value;
   const title = $('challengeBossTitleInput').value;
   const author = $('challengeBossAuthor').value;
   if (![verse,title,author].every(value => value.trim())) {
     $('challengeBossFeedback').textContent = '请填写完整诗句、诗名和作者。'; return;
   }
-  const work = matchChallenge(verse, title, author, {verses:allChallengeEntries()});
-  const sentence = work?.sentences.find(line => cleanSubmission(line) === cleanSubmission(verse)
-    || (work.title === '山行' && cleanSubmission(line).replace('白云生处', '白云深处') === cleanSubmission(verse)));
+  let work = matchChallenge(verse, title, author, {verses:allChallengeEntries()});
+  if (!work) {
+    const result = await verifyUnknownChallenge(verse,title,author,boss);
+    if (!result) return;
+    if (result.status === 'verified') work = {...result.entry,sentences:[result.entry.sentence]};
+    else if (result.status !== 'mismatch') { $('challengeBossFeedback').textContent = verificationMessage(result); return; }
+  }
+  const sentence = work?.sentence || work?.sentences[0];
   if (!sentence || challengeVerseKind(sentence) !== boss.kind) {
     boss.hp--;
     $('challengeBossFeedback').textContent = `本场要求${boss.kind}，请核对诗句、诗名和作者。扣一颗心。`;
     if (!boss.hp) boss.status = 'lost';
-    renderChallengeBoss();
+    render();
     if (boss.status === 'lost') $('challengeBossStart').focus({preventScroll:true});
     return;
   }
@@ -85,12 +90,13 @@ function submitChallengeBoss() {
   if (boss.used.includes(key)) { $('challengeBossFeedback').textContent = '这句已破过一道墨障，请换一句。'; return; }
   boss.used.push(key);
   boss.index++;
+  state.lastChallenge = {sentence, title:work.title, author:work.author};
   if (boss.index === 3) boss.status = 'won';
   else nextChallengeBossHint();
   $('challengeBossFeedback').textContent = `诗句无误，已破 ${boss.index} / 3 重墨障！`;
   playTone(boss.status === 'won');
-  renderChallengeBoss();
-  playAttackEffect($('challengeBossDialog'), $('challengeBossBanner'), 1, '破墨 −1');
+  render();
+  playAttackEffect($('scene'), $('monster'), 1);
   if (boss.status === 'won') $('challengeBossContinue').focus({preventScroll:true});
 }
 
@@ -99,7 +105,7 @@ function finishChallengeBoss() {
   clearAttackEffects();
   state.challengeBossWins++;
   state.challengeBoss = null;
-  $('challengeBossDialog').close();
+  $('challengeBossPanel').hidden = true;
   if (state.challengeBossWins === 4) { finish(true); return; }
   advanceChallengeRound();
   $('challengeVerse').focus({preventScroll:true});
@@ -109,44 +115,40 @@ function renderChallengeBoss() {
   const boss = state.challengeBoss;
   if (!boss) return;
   const active = boss.status === 'active', won = boss.status === 'won', lost = boss.status === 'lost';
-  $('challengeBossDialog').dataset.phase = boss.status;
-  $('challengeBossCheckpoint').textContent = `第 ${boss.checkpoint} 句 · 第 ${state.challengeBossWins + 1} / 4 场`;
-  $('challengeBossName').textContent = `墨魇 · ${currentChallengeVolume().name}试炼`;
-  $('challengeBossTitle').textContent = won ? `${boss.kind} · 破阵成功` : lost ? '胜负未定，再试一回' : `${boss.kind} · 强敌来袭`;
+  $('challengeBossPanel').dataset.phase = boss.status;
+  $('enemyName').textContent = `${boss.kind}墨魇`;
+  const badge = document.createElement('span'); badge.textContent = 'Boss'; $('enemyName').append(badge);
+  $('enemyHealthLabel').textContent = '墨障';
+  $('enemyHpText').textContent = `${3 - boss.index} / 3`;
+  $('enemyHpBar').style.width = `${(3 - boss.index) / 3 * 100}%`;
+  $('monster').style.setProperty('--monster', '#929880');
+  $('enemySpeech').textContent = won ? '好诗！这回算我输了……' : lost ? '嘿嘿，再读几卷书来试试？' : ['三重墨障，你的诗能破得开吗？','才破一重，可别得意太早！','竟能逼我至此……再来！'][boss.index];
+  $('playerHpText').textContent = `${boss.hp} / 6`;
+  const hearts = $('playerHearts') || $('playerStars');
+  hearts.setAttribute('aria-label', `剩余 ${boss.hp} 颗爱心，共 6 颗`);
+  hearts.innerHTML = Array.from({length:6}, (_,index) => `<span class="life-heart${index < boss.hp ? '' : ' lost'}" aria-hidden="true">♥</span>`).join('');
   $('challengeBossDescription').textContent = won ? '三句成诗，三重墨障尽破。' : lost ? '本场重新开始，恢复六颗心；普通关卡的十句进度保留。'
     : `不限定主题，写出三句不同的${boss.kind}诗文，并填写诗名与作者，即可击败本场 Boss。`;
-  $('challengeBossIntro').hidden = active;
-  $('challengeBossCombat').hidden = !active;
+  $('challengeBossDescription').hidden = active;
+  $('challengeBossForm').hidden = !active;
+  [...$('challengeBossForm').elements].forEach(element => element.disabled = state.busy);
   $('challengeBossStart').hidden = won || active;
   $('challengeBossStart').textContent = lost ? '重新迎战 →' : '开始战斗 →';
   $('challengeBossContinue').hidden = !won;
   $('challengeBossContinue').textContent = state.challengeBossWins === 3 ? '四关已破，完成试炼 →' : '破阵成功，继续挑战 →';
-  $('challengeBossSeal').textContent = won ? '胜' : boss.kind[0];
-  $('challengeBossProgress').textContent = `${boss.index} / 3 句`;
-  $('challengeBossHealthText').textContent = `${3 - boss.index} / 3`;
-  $('challengeBossHealthBar').style.width = `${(3 - boss.index) / 3 * 100}%`;
-  $('challengeBossLives').textContent = '♥'.repeat(boss.hp) + '♡'.repeat(6 - boss.hp);
-  $('challengeBossLives').setAttribute('aria-label', `剩余 ${boss.hp} 颗爱心，共 6 颗`);
-  $('challengeBossRule').textContent = boss.kind === '杂言' ? '本场杂言：一句内各分句字数不齐；请写完整一句。' : `本场${boss.kind}：每个分句均为${boss.kind[0]}字；请写完整一句。`;
-  $('challengeBossHintButton').textContent = `✧ 帮助 ${boss.hintStep}/3`;
-  $('challengeBossHintButton').disabled = !active || !boss.hint || boss.hintStep >= 3;
+  $('challengeTipText').textContent = (boss.kind === '杂言' ? '本场要求杂言：一句内各分句字数不齐。' : `本场要求${boss.kind}：每个分句均为${boss.kind[0]}字。`) + '写出三句不同的完整诗句，并填写诗名与作者。';
+  $('challengeBossHintButton').textContent = boss.hintStep >= 3 ? '✧ 换一句' : `✧ 帮助 ${boss.hintStep}/3`;
+  $('challengeBossHintButton').disabled = !active || !boss.hint || state.busy;
 }
 
 $('challengeBossForm').addEventListener('submit', event => { event.preventDefault(); submitChallengeBoss(); });
 $('challengeBossStart').addEventListener('click', startChallengeBoss);
 $('challengeBossContinue').addEventListener('click', finishChallengeBoss);
-$('challengeBossResume').addEventListener('click', openChallengeBoss);
-$('challengeBossPause').addEventListener('click', () => $('challengeBossDialog').close());
 $('challengeBossHintButton').addEventListener('click', () => {
   const boss = state.challengeBoss;
-  if (boss?.status !== 'active' || !boss.hint || boss.hintStep >= 3) return;
+  if (boss?.status !== 'active' || !boss.hint || state.busy) return;
+  if (boss.hintStep >= 3 || boss.used.includes(normalize(boss.hint.sentence))) nextChallengeBossHint(true);
   boss.hintStep++;
   fillChallengeHint(boss.hint, boss.hintStep, ['challengeBossVerse', 'challengeBossTitleInput', 'challengeBossAuthor']);
   renderChallengeBoss();
-});
-$('challengeBossDialog').addEventListener('close', () => {
-  clearAttackEffect($('challengeBossDialog'));
-  if (state?.mode === 'challenge' && !$('gameScreen').hidden && state.challengeBoss) {
-    render(); $('challengeBossResume').focus({preventScroll:true});
-  }
 });
