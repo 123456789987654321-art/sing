@@ -22,7 +22,9 @@ const QUESTIONS = POEMS.flatMap(poem => {
 const DISTRACTORS = [...new Set(POEMS.flatMap(poem => [...normalize(poem[3])]))];
 const VOLUME = CHALLENGE_VOLUMES[0];
 let selectedMode = 'learning';
-let state, sound = false, audioContext, transitionTimer;
+let state, sound = true, audioContext, audioOutput, transitionTimer;
+try { sound = localStorage.getItem('poetry-sound-enabled-v1') !== 'false'; }
+catch { /* Audio preferences are optional when storage is unavailable. */ }
 
 function shuffled(values) {
   const result = [...values];
@@ -767,14 +769,50 @@ function playTone(victory = false) {
   if (!sound) return;
   try {
     audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
-    audioContext.resume();
-    (victory ? [392,494,587,784] : [440,659]).forEach((freq,i) => {
-      const osc = audioContext.createOscillator(), gain = audioContext.createGain(), t = audioContext.currentTime + i * .09;
-      osc.type = 'sine'; osc.frequency.value = freq;
-      gain.gain.setValueAtTime(.08,t); gain.gain.exponentialRampToValueAtTime(.001,t + .35);
-      osc.connect(gain); gain.connect(audioContext.destination); osc.start(t); osc.stop(t + .35);
-    });
+    audioContext.resume().catch(() => {});
+    if (!audioOutput) {
+      audioOutput = audioContext.createGain();
+      audioOutput.connect(audioContext.destination);
+    }
+    const now = audioContext.currentTime;
+    // A brief filtered rush follows the sword; the low hit lands with the flash.
+    const buffer = audioContext.createBuffer(1, Math.ceil(audioContext.sampleRate * .19), audioContext.sampleRate);
+    const samples = buffer.getChannelData(0);
+    for (let i = 0; i < samples.length; i++) samples[i] = Math.random() * 2 - 1;
+    const swoosh = audioContext.createBufferSource(), filter = audioContext.createBiquadFilter(), rushGain = audioContext.createGain();
+    swoosh.buffer = buffer;
+    filter.type = 'bandpass'; filter.Q.value = .65;
+    filter.frequency.setValueAtTime(2800, now);
+    filter.frequency.exponentialRampToValueAtTime(550, now + .18);
+    rushGain.gain.setValueAtTime(.001, now);
+    rushGain.gain.linearRampToValueAtTime(.26, now + .045);
+    rushGain.gain.exponentialRampToValueAtTime(.001, now + .19);
+    swoosh.connect(filter); filter.connect(rushGain); rushGain.connect(audioOutput);
+    swoosh.onended = () => { swoosh.disconnect(); filter.disconnect(); rushGain.disconnect(); };
+    swoosh.start(now); swoosh.stop(now + .19);
+    const tone = (frequency, endFrequency, time, duration, volume, type = 'sine') => {
+      const osc = audioContext.createOscillator(), gain = audioContext.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(frequency, time);
+      osc.frequency.exponentialRampToValueAtTime(endFrequency, time + duration);
+      gain.gain.setValueAtTime(.001, time);
+      gain.gain.linearRampToValueAtTime(volume, time + .008);
+      gain.gain.exponentialRampToValueAtTime(.001, time + duration);
+      osc.connect(gain); gain.connect(audioOutput);
+      osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+      osc.start(time); osc.stop(time + duration);
+    };
+    tone(190, 60, now + .075, .19, .24);
+    tone(920, 380, now + .08, .12, .055, 'triangle');
+    if (victory) [392,494,587,784].forEach((frequency,index) => tone(frequency, frequency, now + .19 + index * .075, .25, .055));
   } catch { /* Sound is optional. */ }
+}
+
+function renderSoundButton() {
+  $('soundButton').innerHTML = sound ? '♪' : '♪<span class="sound-off">/</span>';
+  $('soundButton').title = sound ? '关闭音效' : '开启音效';
+  $('soundButton').setAttribute('aria-label', $('soundButton').title);
+  $('soundButton').setAttribute('aria-pressed', String(sound));
 }
 
 $('saveLearning').addEventListener('click', saveLearningProgress);
@@ -794,9 +832,10 @@ $('helpButton').addEventListener('click', () => $('helpDialog').showModal());
 document.querySelectorAll('.dialog-close,.dialog-close-action').forEach(button => button.addEventListener('click', () => $('helpDialog').close()));
 $('soundButton').addEventListener('click', () => {
   sound = !sound;
-  $('soundButton').innerHTML = sound ? '♪' : '♪<span class="sound-off">/</span>';
-  $('soundButton').title = sound ? '关闭音效' : '开启音效';
-  $('soundButton').setAttribute('aria-label', $('soundButton').title);
+  try { localStorage.setItem('poetry-sound-enabled-v1', String(sound)); }
+  catch { /* Keep the current choice for this page. */ }
+  if (audioOutput) audioOutput.gain.setTargetAtTime(sound ? 1 : 0, audioContext.currentTime, .01);
+  renderSoundButton();
   if (sound) playTone();
 });
 document.querySelectorAll('[data-entry-mode]').forEach(button => {
@@ -814,3 +853,4 @@ $('startChallenge').addEventListener('click', () => startGame('challenge'));
 $('modeButton').addEventListener('click', showModeSelection);
 $('resultModeButton').addEventListener('click', showModeSelection);
 renderModeSelection();
+renderSoundButton();
