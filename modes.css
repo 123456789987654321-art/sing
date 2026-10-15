@@ -22,10 +22,9 @@
 .volume-seal { font: 28px var(--serif); writing-mode: vertical-rl; letter-spacing: 8px; border: 1px solid #b0b59a; border-radius: 25px 25px 8px 8px; background: #edf0df; color: #7f8b67; padding: 18px 12px 10px; }
 .volume-heading h2 { font: 600 26px var(--serif); margin: 8px 0 10px; }
 .volume-heading p, .chapter-card p { color: #968c76; font-size: 12px; line-height: 1.8; }
-.chapter-grid { display: flex; flex-direction: column; border-top: 1px solid #d9d1bc; }
-.chapter-card { display: flex; align-items: baseline; gap: 20px; padding: 24px 6px; border-bottom: 1px solid #e4ddcb; }
+.chapter-grid { display: flex; flex-direction: column; }
+.chapter-card { display: flex; align-items: baseline; gap: 28px; padding: 24px 6px; }
 .chapter-card h3 { flex-shrink: 0; font: 600 18px/1.8 var(--serif); margin: 0; color: var(--category-color); }
-.chapter-leader { flex: 1; min-width: 24px; border-bottom: 1px dotted #c6bea7; }
 .chapter-card p { margin: 0; font: 13px/1.8 var(--serif); }
 .volume-bottom { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 24px; }
 .volume-bottom p { margin: 0; font: 14px/1.8 var(--serif); }

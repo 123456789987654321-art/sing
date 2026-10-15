@@ -297,7 +297,7 @@ function renderModeSelection() {
   });
   $('volumeTitle').textContent = VOLUME.title;
   $('volumeDescription').textContent = VOLUME.description;
-  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><span class="chapter-leader" aria-hidden="true"></span><p>${chapter.description}</p></div>`).join('');
+  $('chapterPreview').innerHTML = VOLUME.chapters.map(chapter => `<div class="chapter-card" role="listitem" style="--category-color:${chapter.color}"><h3>${chapter.chapter}</h3><p>${chapter.description}</p></div>`).join('');
   $('chapterPreview').setAttribute('role', 'list');
   $('chapterPreview').setAttribute('aria-label', '四季篇目录');
   chooseMode(selectedMode);
